@@ -1002,12 +1002,23 @@ function UPD(){
   setEl('cn',doneCnt);
   setEl('rn',regCnt);
   var pct=Math.min(Math.round(gradTot/48*100),100);
-  setEl('pp',pct+'%');
+  var regGradTotSbar=regBas+regDev+regApp; // ステータスバー用（regGradTotは後で定義）
+  var pctReg=Math.min(Math.round((gradTot+regGradTotSbar)/48*100),100);
+  var ppEl=document.getElementById('pp');
+  if(ppEl){
+    var regPctStr=regGradTotSbar>0?' <span style="color:#1565c0;font-size:.68rem;font-weight:600">（登録含'+pctReg+'%）</span>':'';
+    ppEl.innerHTML=pct+'%'+regPctStr;
+  }
   setStyle('pf','width',pct+'%');
 
   var exTot=exFa+exMa+exAu;
   var ePct=Math.min(Math.round(exTot/28*100),100);
-  setEl('ep',exTot+'/28単位');
+  var exRegSbar=regExFa+regExMa+regExAu;
+  var epEl=document.getElementById('ep');
+  if(epEl){
+    var regEpStr=exRegSbar>0?' <span style="color:#1565c0;font-size:.68rem;font-weight:600">（登録含'+(exTot+exRegSbar)+'）</span>':'';
+    epEl.innerHTML=exTot+'/28単位'+regEpStr;
+  }
   setStyle('ef','width',ePct+'%');
 
   // 要件タブ更新（要件タブが存在する場合のみ）
