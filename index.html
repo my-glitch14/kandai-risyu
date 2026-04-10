@@ -601,6 +601,13 @@ var D=[
 // STATE & STORAGE
 // ============================================================
 var st={sf:'all',yf:'all',gf:'all',syf:'all',hm:'none',ef:'all',dedup:true,q:''};
+// 自分の投稿を識別するためのユーザーID（ブラウザごとに固定）
+var myUid=(function(){
+  var k='ksu_uid';
+  var v=localStorage.getItem(k);
+  if(!v){v='u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);localStorage.setItem(k,v);}
+  return v;
+})();
 var ttSem='sp';
 var ttView='mine';
 
@@ -929,15 +936,20 @@ function renderRevs(code,revs){
     var num=revs.length-i;
     var ratStars='';
     if(r.rat>0)for(var j=1;j<=5;j++)ratStars+=(j<=r.rat?'<span style="color:#f1c40f">★</span>':'<span style="color:#bdc3c7">☆</span>');
-    var difBdg=r.dif?'<span class="rev-dif">'+difLbls[r.dif]+'</span>':'';
+    var ratBdg=ratStars?'<span style="display:inline-flex;align-items:center;gap:3px;background:#fffde7;border-radius:6px;padding:1px 6px;font-size:.67rem"><span style="color:#f57f17;font-weight:700">おすすめ</span>'+ratStars+'</span>':'';
+    var difBdg=r.dif?'<span style="display:inline-flex;align-items:center;gap:3px;background:#fde8e7;border-radius:6px;padding:1px 6px;font-size:.67rem"><span style="color:#c0392b;font-weight:700">難易度</span><span style="color:#c0392b">'+difLbls[r.dif]+'</span></span>':'';
     var txt=r.tx?'<div class="rev-txt">'+EH(r.tx)+'</div>':'';
-    return '<div class="rev-item">'+
+    var isMe=r.uid&&r.uid===myUid;
+    var delBtn=isMe?'<button class="rev-del" onclick="DC(\''+code+'\','+i+')" title="削除">✕</button>':'';
+    var myMark=isMe?'<span style="font-size:.62rem;color:var(--primary);background:#eef2ff;border-radius:8px;padding:1px 5px;font-weight:700">自分</span>':'';
+    return '<div class="rev-item"'+(isMe?' style="border-left:3px solid var(--primary)"':'')+'>'+
       '<div class="rev-meta">'+
         '<span class="rev-num">👤 投稿'+num+'</span>'+
-        (ratStars?'<span class="rev-stars">'+ratStars+'</span>':'')+
+        myMark+
+        ratBdg+
         difBdg+
-        '<span class="rev-date">'+EH(r.dt||'')+'</span>'+
-        '<button class="rev-del" onclick="DC(\''+code+'\','+i+')">✕</button>'+
+        '<span class="rev-date" style="margin-left:auto">'+EH(r.dt||'')+'</span>'+
+        delBtn+
       '</div>'+
       txt+
     '</div>';
@@ -1022,7 +1034,7 @@ function AC(code){
   var now=new Date();
   var dt=now.getFullYear()+'/'+(now.getMonth()+1<10?'0':'')+(now.getMonth()+1)+'/'+(now.getDate()<10?'0':'')+now.getDate();
   // レビューとして保存（rat・dif・txを1件にまとめる）
-  s.cmt.unshift({rat:rat,dif:dif,tx:tx,dt:dt});
+  s.cmt.unshift({rat:rat,dif:dif,tx:tx,dt:dt,uid:myUid});
   // 最新の評価を集計してrat/difを更新（全レビューの最新値）
   s.rat=rat||s.rat;s.dif=dif||s.dif;
   SSC(code,s);
