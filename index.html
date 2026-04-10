@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <title>関大 会計専門職大学院 シラバス管理</title>
 <style>
 :root{
@@ -592,49 +593,59 @@ function SS(d){localStorage.setItem('ksu2025',JSON.stringify(d))}
 function GDpersonal(c){var s=GS();return s[c]||{done:false,reg:false}}
 function SDpersonal(c,d){var s=GS();s[c]=d;SS(s)}
 
-// ---------- 共有データ: rat, dif, cmt ----------
-// window.storage（Claude Artifact環境）が使える場合は共有、使えない場合はlocalStorageにフォールバック
+// ---------- 共有データ（Supabase）: rat, dif, cmt ----------
+var SUPA_URL='https://iewiztnjlahikwraovqb.supabase.co';
+var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlld2l6dG5qbGFoaWt3cmFvdnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MDg4NTcsImV4cCI6MjA5MTM4NDg1N30.iapM9Dnk9FZbmAR-xE81KivsIg-heM85U-SS75SHDj8';
+var _supa=null;
 var sharedCache={};
 var sharedLoaded=false;
-var useWindowStorage=(typeof window!=='undefined'&&window.storage&&typeof window.storage.get==='function');
 
-// 全共有データを一括取得してキャッシュに格納
+function getSupa(){
+  if(!_supa&&typeof supabase!=='undefined'){
+    _supa=supabase.createClient(SUPA_URL,SUPA_KEY);
+  }
+  return _supa;
+}
+
+// 全件取得してキャッシュに格納
 async function loadShared(){
-  if(useWindowStorage){
-    try{
-      var result=await window.storage.get('ksu_shared_reviews',true);
-      if(result&&result.value){sharedCache=JSON.parse(result.value);}
-    }catch(e){useWindowStorage=false;}
+  var sb=getSupa();
+  if(!sb){
+    // フォールバック: localStorage
+    try{var l=localStorage.getItem('ksu_shared_reviews');if(l)sharedCache=JSON.parse(l);}catch(e){}
+    sharedLoaded=true;return;
   }
-  // windowStorageが使えない場合はlocalStorageから読み込み
-  if(!useWindowStorage){
-    try{
-      var local=localStorage.getItem('ksu_shared_reviews');
-      if(local)sharedCache=JSON.parse(local);
-    }catch(e){sharedCache={};}
-  }
-  // 起動時にローカルキャッシュで初期化（同期的にも使えるよう）
+  try{
+    var res=await sb.from('reviews').select('code,rat,dif,cmt');
+    if(res.data){
+      sharedCache={};
+      res.data.forEach(function(row){
+        sharedCache[row.code]={rat:row.rat||0,dif:row.dif||0,cmt:row.cmt||[]};
+      });
+    }
+  }catch(e){console.warn('loadShared failed',e);}
   sharedLoaded=true;
 }
 
-// 共有データを保存
-async function saveShared(){
-  if(useWindowStorage){
-    try{
-      await window.storage.set('ksu_shared_reviews',JSON.stringify(sharedCache),true);
-      return;
-    }catch(e){useWindowStorage=false;}
+// 1科目をupsert保存
+async function saveShared(code,data){
+  var sb=getSupa();
+  if(!sb){
+    try{localStorage.setItem('ksu_shared_reviews',JSON.stringify(sharedCache));}catch(e){}
+    return;
   }
-  // フォールバック: localStorage
-  try{localStorage.setItem('ksu_shared_reviews',JSON.stringify(sharedCache));}
-  catch(e){console.warn('save failed',e);}
+  try{
+    await sb.from('reviews').upsert({
+      code:code,rat:data.rat||0,dif:data.dif||0,cmt:data.cmt||[],updated_at:new Date().toISOString()
+    },{onConflict:'code'});
+  }catch(e){console.warn('saveShared failed',e);}
 }
 
-// 同期的に最新キャッシュから取得
+// キャッシュから取得
 function GSC(c){return sharedCache[c]||{rat:0,dif:0,cmt:[]};}
 
-// キャッシュを更新して非同期で保存
-function SSC(c,d){sharedCache[c]=d;saveShared();}
+// キャッシュ更新 + Supabaseに保存
+function SSC(c,d){sharedCache[c]=d;saveShared(c,d);}
 
 // 統合GD: 個人データ+共有データをマージして返す
 function GD(c){
@@ -1288,14 +1299,9 @@ function switchTab(id){
 // INIT
 // ============================================================
 document.getElementById('si').addEventListener('input',function(){st.q=this.value;RC()});
-// 起動時: まずlocalStorageから同期的にキャッシュを初期化して即描画
-try{
-  var _ls=localStorage.getItem('ksu_shared_reviews');
-  if(_ls)sharedCache=JSON.parse(_ls);
-}catch(e){}
+// 起動時: まず即描画してからSupabaseで最新データ取得→再描画
 RC();UPD();
-// その後window.storageがあれば非同期で最新データを取得して再描画
-loadShared().then(function(){RC();UPD();}).catch(function(){});
+loadShared().then(function(){RC();UPD();}).catch(function(){RC();UPD();});
 </script>
 </body>
 </html>
