@@ -979,12 +979,9 @@ function UPD(){
   var allOkReg=(exFa+regExFa>=10&&exMa+regExMa>=6&&exAu+regExAu>=6&&exTotReg>=28);
   var tsTot=document.getElementById('ts-tot');
   if(tsTot){
-    var tv=tsTot.querySelector('.ts-total-val');
-    if(tv){
-      var regExtra=regExFa+regExMa+regExAu;
-      var regStr=regExtra>0?' <span class="ts-reg">（登録済含: '+exTotReg+'単位'+(allOkReg?' ✅':'')+'）</span>':'';
-      tv.innerHTML=exTot+' / 28単位以上'+(allOk?' ✅達成！':'')+regStr;
-    }
+    var regExtra=regExFa+regExMa+regExAu;
+    var regStr=regExtra>0?' <span class="ts-reg">（登録済含: '+exTotReg+'単位'+(allOkReg?' ✅':'')+'）</span>':'';
+    tsTot.innerHTML=exTot+' / 28単位以上'+(allOk?' ✅達成！':'')+regStr;
   }
 
   // 充足チェック
