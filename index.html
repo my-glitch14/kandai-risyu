@@ -278,6 +278,13 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
     <button class="fbtn" data-gf="bas" onclick="GF('bas')">基本</button>
     <button class="fbtn" data-gf="dev" onclick="GF('dev')">発展</button>
     <button class="fbtn" data-gf="app" onclick="GF('app')">応用</button>
+    <span class="glbl">系統：</span>
+    <button class="fbtn on" data-syf="all" onclick="SYF('all')">全て</button>
+    <button class="fbtn" data-syf="fa" onclick="SYF('fa')" style="border-color:#1565c0;color:#1565c0">財務</button>
+    <button class="fbtn" data-syf="ma" onclick="SYF('ma')" style="border-color:#2e7d32;color:#2e7d32">管理</button>
+    <button class="fbtn" data-syf="au" onclick="SYF('au')" style="border-color:#6a1b9a;color:#6a1b9a">監査</button>
+    <button class="fbtn" data-syf="la" onclick="SYF('la')" style="border-color:#e65100;color:#e65100">法律</button>
+    <button class="fbtn" data-syf="ec" onclick="SYF('ec')" style="border-color:#00695c;color:#00695c">経営</button>
     <span class="glbl">免除：</span>
     <button class="fbtn on" data-ef="all" onclick="EF('all')">全て</button>
     <button class="fbtn" data-ef="only" onclick="EF('only')">⚖️ 対象のみ</button>
@@ -519,11 +526,11 @@ var D=[
   // 応用・実践科目群（1年次）
   {year:"１年次",name:"基本会計プログラム演習",code:"97057",credits:2,class_:"01",teacher:"富田 知嗣",schedule:"秋学期 月3",group:"app",system:"fa",exempt:false,required:false},
   {year:"１年次",name:"基本会計プログラム演習",code:"97058",credits:2,class_:"02",teacher:"富田 知嗣",schedule:"秋学期 火1",group:"app",system:"fa",exempt:false,required:false},
-  {year:"１年次",name:"会計事例研究",code:"97059",credits:2,class_:"",teacher:"廣田 壽俊",schedule:"春学期 金4",group:"app",system:"fa",exempt:false,required:false},
-  {year:"１年次",name:"会社経理実務",code:"97060",credits:2,class_:"",teacher:"池上 しのぶ",schedule:"秋学期（隔週・クォーター） 土3/土4",group:"app",system:"fa",exempt:false,required:false},
-  {year:"１年次",name:"管理会計事例研究",code:"97061",credits:2,class_:"",teacher:"早川 翔",schedule:"春学期 月1",group:"app",system:"ma",exempt:false,required:false},
-  {year:"１年次",name:"監査事例研究",code:"97062",credits:2,class_:"",teacher:"田中 基博",schedule:"秋学期 水2",group:"app",system:"au",exempt:false,required:false},
-  {year:"１年次",name:"基本監査プログラム演習",code:"97063",credits:2,class_:"",teacher:"松本 祥尚",schedule:"秋学期 月2",group:"app",system:"au",exempt:false,required:false},
+  {year:"１年次",name:"会計事例研究",code:"97059",credits:2,class_:"",teacher:"廣田 壽俊",schedule:"春学期 金4",group:"app",system:"fa",exempt:true,required:false},
+  {year:"１年次",name:"会社経理実務",code:"97060",credits:2,class_:"",teacher:"池上 しのぶ",schedule:"秋学期（隔週・クォーター） 土3/土4",group:"app",system:"fa",exempt:true,required:false},
+  {year:"１年次",name:"管理会計事例研究",code:"97061",credits:2,class_:"",teacher:"早川 翔",schedule:"春学期 月1",group:"app",system:"ma",exempt:true,required:false},
+  {year:"１年次",name:"監査事例研究",code:"97062",credits:2,class_:"",teacher:"田中 基博",schedule:"秋学期 水2",group:"app",system:"au",exempt:true,required:false},
+  {year:"１年次",name:"基本監査プログラム演習",code:"97063",credits:2,class_:"",teacher:"松本 祥尚",schedule:"秋学期 月2",group:"app",system:"au",exempt:true,required:false},
   {year:"１年次",name:"アカデミック・ソリューション",code:"97064",credits:2,class_:"01",teacher:"富田 知嗣",schedule:"通年（隔週） 月5",group:"app",system:"ot",exempt:false,required:false},
   {year:"１年次",name:"アカデミック・ソリューション",code:"97065",credits:2,class_:"02",teacher:"中村 繁隆",schedule:"通年（隔週） 月5",group:"app",system:"ot",exempt:false,required:false},
   {year:"１年次",name:"アカデミック・ソリューション",code:"97066",credits:2,class_:"03",teacher:"松本 祥尚",schedule:"通年（隔週） 月5",group:"app",system:"ot",exempt:false,required:false},
@@ -545,11 +552,11 @@ var D=[
   {year:"１年次",name:"監査法人インターンシップ",code:"97082",credits:2,class_:"",teacher:"中村 繁隆",schedule:"夏季集中 他",group:"app",system:"au",exempt:false,required:false},
   {year:"１年次",name:"企業インターンシップ",code:"97083",credits:2,class_:"",teacher:"中村 繁隆",schedule:"夏季集中 他",group:"app",system:"ec",exempt:false,required:false},
   // 応用・実践科目群（2年次）
-  {year:"２年次",name:"実践会計プログラム演習",code:"97084",credits:2,class_:"",teacher:"小林 依子",schedule:"秋学期 水2",group:"app",system:"fa",exempt:false,required:false},
-  {year:"２年次",name:"IFRS事例研究",code:"97085",credits:2,class_:"",teacher:"東 拓也",schedule:"春学期 月4",group:"app",system:"fa",exempt:false,required:false},
-  {year:"２年次",name:"ディスクロージャー実務",code:"97086",credits:2,class_:"",teacher:"小林 依子",schedule:"秋学期 水3",group:"app",system:"fa",exempt:false,required:false},
-  {year:"２年次",name:"国際管理会計事例研究",code:"97087",credits:2,class_:"",teacher:"佐久間 智広",schedule:"春学期 月2",group:"app",system:"ma",exempt:false,required:false},
-  {year:"２年次",name:"実践監査プログラム演習",code:"97088",credits:2,class_:"",teacher:"弓塲 啓司",schedule:"秋学期（隔週・クォーター） 金3/金4",group:"app",system:"au",exempt:false,required:false},
+  {year:"２年次",name:"実践会計プログラム演習",code:"97084",credits:2,class_:"",teacher:"小林 依子",schedule:"秋学期 水2",group:"app",system:"fa",exempt:true,required:false},
+  {year:"２年次",name:"IFRS事例研究",code:"97085",credits:2,class_:"",teacher:"東 拓也",schedule:"春学期 月4",group:"app",system:"fa",exempt:true,required:false},
+  {year:"２年次",name:"ディスクロージャー実務",code:"97086",credits:2,class_:"",teacher:"小林 依子",schedule:"秋学期 水3",group:"app",system:"fa",exempt:true,required:false},
+  {year:"２年次",name:"国際管理会計事例研究",code:"97087",credits:2,class_:"",teacher:"佐久間 智広",schedule:"春学期 月2",group:"app",system:"ma",exempt:true,required:false},
+  {year:"２年次",name:"実践監査プログラム演習",code:"97088",credits:2,class_:"",teacher:"弓塲 啓司",schedule:"秋学期（隔週・クォーター） 金3/金4",group:"app",system:"au",exempt:true,required:false},
   {year:"２年次",name:"企業法判例演習",code:"97089",credits:2,class_:"",teacher:"岸本 達司",schedule:"秋学期 月2",group:"app",system:"la",exempt:false,required:false},
   {year:"２年次",name:"税務事例研究",code:"97090",credits:2,class_:"",teacher:"松浦 総一",schedule:"春学期 金1",group:"app",system:"la",exempt:false,required:false},
   {year:"２年次",name:"企業実践コミュニケーション",code:"97091",credits:2,class_:"",teacher:"古橋 孝志",schedule:"春学期 火2",group:"app",system:"ec",exempt:false,required:false},
@@ -575,7 +582,7 @@ var D=[
 // ============================================================
 // STATE & STORAGE
 // ============================================================
-var st={sf:'all',yf:'all',gf:'all',hm:'none',ef:'all',q:''};
+var st={sf:'all',yf:'all',gf:'all',syf:'all',hm:'none',ef:'all',dedup:true,q:''};
 var ttSem='sp';
 var ttView='mine';
 
@@ -691,6 +698,16 @@ function EF(v){
   document.querySelectorAll('[data-ef]').forEach(function(b){b.classList.toggle('on',b.dataset.ef===v)});
   RC();
 }
+function SYF(v){
+  st.syf=v;
+  document.querySelectorAll('[data-syf]').forEach(function(b){
+    var on=b.dataset.syf===v;
+    b.classList.toggle('on',on);
+    // on時はborder/colorをデフォルトのprimaryに
+    if(on){b.style.borderColor='';b.style.color='';}
+  });
+  RC();
+}
 
 // ============================================================
 // RENDER CARD
@@ -758,16 +775,28 @@ function RC(){
   var sl=document.getElementById('sl');
   var srt=document.getElementById('ss').value;
   var q=st.q.toLowerCase();
+  // 同名科目の重複除去: 履修済み or 履修登録済みのクラスが存在する場合は代表1つだけ残す
+  var dedupNames={};
+  D.forEach(function(s){
+    var sd=GD(s.code);
+    if(sd.done||sd.reg){
+      if(!dedupNames[s.name])dedupNames[s.name]={code:s.code,done:sd.done,reg:sd.reg};
+    }
+  });
+
   var data=D.filter(function(s){
     var t=ST(s.schedule);
     if(st.sf!=='all'&&t!==st.sf)return false;
     if(st.yf==='1'&&s.year!=='１年次')return false;
     if(st.yf==='2'&&s.year!=='２年次')return false;
     if(st.gf!=='all'&&s.group!==st.gf)return false;
+    if(st.syf!=='all'&&s.system!==st.syf)return false;
     var _sd=GD(s.code);
     if(st.ef==='only'&&!s.exempt)return false;
     if(st.hm==='done'&&_sd.done)return false;
     if(st.hm==='done_reg'&&(_sd.done||_sd.reg))return false;
+    // 同名重複除去: 自分が代表でない場合は非表示
+    if(dedupNames[s.name]&&dedupNames[s.name].code!==s.code)return false;
     if(q&&s.name.toLowerCase().indexOf(q)<0&&s.teacher.toLowerCase().indexOf(q)<0&&s.code.indexOf(q)<0)return false;
     return true;
   });
