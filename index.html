@@ -730,66 +730,73 @@ function UPD(){
   var gradTot=bas+dev+app; // 実取得（上限なし表示用）
   var need48=Math.max(0,48-gradTot);
 
-  // ステータスバー更新
+  // ステータスバー更新（常に表示）
   var totalAll=D.reduce(function(a,s){return a+s.credits},0);
-  document.getElementById('tc').textContent=totalAll;
-  document.getElementById('cc').textContent=gradTot;
-  document.getElementById('rc').textContent=Math.max(0,48-gradTot);
-  document.getElementById('cn').textContent=doneCnt;
+  function setEl(id,val){var e=document.getElementById(id);if(e)e.textContent=val;}
+  function setStyle(id,prop,val){var e=document.getElementById(id);if(e)e.style[prop]=val;}
+  setEl('tc',totalAll);
+  setEl('cc',gradTot);
+  setEl('rc',Math.max(0,48-gradTot));
+  setEl('cn',doneCnt);
   var pct=Math.min(Math.round(gradTot/48*100),100);
-  document.getElementById('pp').textContent=pct+'%';
-  document.getElementById('pf').style.width=pct+'%';
+  setEl('pp',pct+'%');
+  setStyle('pf','width',pct+'%');
 
   var exTot=exFa+exMa+exAu;
   var ePct=Math.min(Math.round(exTot/28*100),100);
-  document.getElementById('ep').textContent=exTot+'/28単位';
-  document.getElementById('ef').style.width=ePct+'%';
+  setEl('ep',exTot+'/28単位');
+  setStyle('ef','width',ePct+'%');
 
-  // 要件タブ更新
+  // 要件タブ更新（要件タブが存在する場合のみ）
   setBar('g-bas',bas,16);
   setBar('g-dev',dev,16);
   setBar('g-app',app,12);
-  document.getElementById('g-tot-v').textContent=gradTot+'/48単位';
-  document.getElementById('g-tot-b').style.width=clamp(gradTot,48)+'%';
+  setEl('g-tot-v',gradTot+'/48単位');
+  setStyle('g-tot-b','width',clamp(gradTot,48)+'%');
 
   // 短答免除
   setTsItem('ts-fa',exFa,10);
   setTsItem('ts-ma',exMa,6);
   setTsItem('ts-au',exAu,6);
   var allOk=(exFa>=10&&exMa>=6&&exAu>=6&&exTot>=28);
-  document.getElementById('ts-tot').querySelector('.ts-total-val').textContent=exTot+' / 28単位以上'+(allOk?' ✅達成！':'');
+  var tsTot=document.getElementById('ts-tot');
+  if(tsTot){var tv=tsTot.querySelector('.ts-total-val');if(tv)tv.textContent=exTot+' / 28単位以上'+(allOk?' ✅達成！':'');}
 
   // 充足チェック
   var needList=document.getElementById('need-list');
-  var items=[];
-  items.push(mkReqRow('基本科目群（卒業）',bas,16,16));
-  items.push(mkReqRow('発展科目群（卒業）',dev,16,16));
-  items.push(mkReqRow('応用・実践科目群（卒業）',app,12,12));
-  items.push(mkReqRow('卒業合計',gradTot,48,48));
-  items.push(mkReqRow('短答免除 財務会計系',exFa,10,10));
-  items.push(mkReqRow('短答免除 管理会計系',exMa,6,6));
-  items.push(mkReqRow('短答免除 監査系',exAu,6,6));
-  items.push(mkReqRow('短答免除 合計',exTot,28,28));
-  needList.innerHTML=items.join('');
+  if(needList){
+    var items=[];
+    items.push(mkReqRow('基本科目群（卒業）',bas,16,16));
+    items.push(mkReqRow('発展科目群（卒業）',dev,16,16));
+    items.push(mkReqRow('応用・実践科目群（卒業）',app,12,12));
+    items.push(mkReqRow('卒業合計',gradTot,48,48));
+    items.push(mkReqRow('短答免除 財務会計系',exFa,10,10));
+    items.push(mkReqRow('短答免除 管理会計系',exMa,6,6));
+    items.push(mkReqRow('短答免除 監査系',exAu,6,6));
+    items.push(mkReqRow('短答免除 合計',exTot,28,28));
+    needList.innerHTML=items.join('');
+  }
 
   // 系統別
   var sysList=document.getElementById('system-list');
-  var sysItems=['fa','ma','au','la','ec','ot'].map(function(k){
-    var v=sysMap[k]||0;
-    return '<div class="req-row"><span class="req-name"><span class="bdg '+SC(k)+'">'+SN(k)+'</span></span><span class="req-val">'+v+'単位</span></div>';
-  });
-  sysList.innerHTML=sysItems.join('');
+  if(sysList){
+    var sysItems=['fa','ma','au','la','ec','ot'].map(function(k){
+      var v=sysMap[k]||0;
+      return '<div class="req-row"><span class="req-name"><span class="bdg '+SC(k)+'">'+SN(k)+'</span></span><span class="req-val">'+v+'単位</span></div>';
+    });
+    sysList.innerHTML=sysItems.join('');
+  }
 }
 
 function setBar(id,v,max){
-  document.getElementById(id+'-v').textContent=v+'/'+max+'単位';
-  document.getElementById(id+'-b').style.width=clamp(v,max)+'%';
+  var ev=document.getElementById(id+'-v');if(ev)ev.textContent=v+'/'+max+'単位';
+  var eb2=document.getElementById(id+'-b');if(eb2)eb2.style.width=clamp(v,max)+'%';
 }
 function setTsItem(id,v,max){
   var el=document.getElementById(id);
-  document.getElementById(id+'-v').textContent=v;
-  document.getElementById(id+'-b').style.width=clamp(v,max)+'%';
-  el.style.borderTop='3px solid '+(v>=max?'var(--spring)':'var(--border)');
+  var ev=document.getElementById(id+'-v');if(ev)ev.textContent=v;
+  var eb=document.getElementById(id+'-b');if(eb)eb.style.width=clamp(v,max)+'%';
+  if(el)el.style.borderTop='3px solid '+(v>=max?'var(--spring)':'var(--border)');
 }
 function mkReqRow(name,v,min,max){
   var cls=v>=min?'ok':v>=min*0.7?'near':'ng';
