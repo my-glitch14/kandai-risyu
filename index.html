@@ -911,17 +911,17 @@ function initStars(code){
         tmpDif[code]=i+1;
         updateTmpStars(tfWrap,'dif',i+1);
         var lbl=document.getElementById('TFL'+code);
-        if(lbl)lbl.textContent=difLbls[i+1];
+        if(lbl)lbl.textContent=(i+1)+'/5';
       };
     });
     updateTmpStars(tfWrap,'dif',tmpDif[code]||0);
     var lbl2=document.getElementById('TFL'+code);
-    if(lbl2)lbl2.textContent=tmpDif[code]?difLbls[tmpDif[code]]:'未選択';
+    if(lbl2)lbl2.textContent=tmpDif[code]?(tmpDif[code]+'/5'):'未選択';
   }
 }
 
 function updateTmpStars(wrap,tp,val){
-  var ac=tp==='dif'?'#e74c3c':'#f1c40f';
+  var ac='#f1c40f'; // どちらも黄色★
   wrap.querySelectorAll('.tmp-star').forEach(function(s,i){
     s.textContent=i<val?'★':'☆';
     s.style.color=i<val?ac:'#bdc3c7';
@@ -937,7 +937,9 @@ function renderRevs(code,revs){
     var ratStars='';
     if(r.rat>0)for(var j=1;j<=5;j++)ratStars+=(j<=r.rat?'<span style="color:#f1c40f">★</span>':'<span style="color:#bdc3c7">☆</span>');
     var ratBdg=ratStars?'<span style="display:inline-flex;align-items:center;gap:3px;background:#fffde7;border-radius:6px;padding:1px 6px;font-size:.67rem"><span style="color:#f57f17;font-weight:700">おすすめ</span>'+ratStars+'</span>':'';
-    var difBdg=r.dif?'<span style="display:inline-flex;align-items:center;gap:3px;background:#fde8e7;border-radius:6px;padding:1px 6px;font-size:.67rem"><span style="color:#c0392b;font-weight:700">難易度</span><span style="color:#c0392b">'+difLbls[r.dif]+'</span></span>':'';
+    var difStars='';
+    if(r.dif>0)for(var k=1;k<=5;k++)difStars+=(k<=r.dif?'<span style="color:#f1c40f">★</span>':'<span style="color:#bdc3c7">☆</span>');
+    var difBdg=difStars?'<span style="display:inline-flex;align-items:center;gap:3px;background:#fff9e6;border-radius:6px;padding:1px 6px;font-size:.67rem"><span style="color:#856404;font-weight:700">難易度</span>'+difStars+'</span>':'';
     var txt=r.tx?'<div class="rev-txt">'+EH(r.tx)+'</div>':'';
     var isMe=r.uid&&r.uid===myUid;
     var delBtn=isMe?'<button class="rev-del" onclick="DC(\''+code+'\','+i+')" title="削除">✕</button>':'';
