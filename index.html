@@ -548,10 +548,74 @@ var st={sf:'all',yf:'all',gf:'all',hm:'none',q:''};
 var ttSem='sp';
 var ttView='mine';
 
+// ---------- 個人データ（localStorage）: done, reg ----------
 function GS(){try{return JSON.parse(localStorage.getItem('ksu2025')||'{}')}catch(e){return{}}}
 function SS(d){localStorage.setItem('ksu2025',JSON.stringify(d))}
-function GD(c){var s=GS();return s[c]||{done:false,reg:false,rat:0,dif:0,cmt:[]}}
-function SD(c,d){var s=GS();s[c]=d;SS(s)}
+function GDpersonal(c){var s=GS();return s[c]||{done:false,reg:false}}
+function SDpersonal(c,d){var s=GS();s[c]=d;SS(s)}
+
+// ---------- 共有データ（window.storage shared）: rat, dif, cmt ----------
+// ローカルキャッシュ（非同期取得後に格納）
+var sharedCache={};  // {code: {rat:0, dif:0, cmt:[]}}
+var sharedLoaded=false;
+
+// 全共有データを一括取得してキャッシュに格納
+async function loadShared(){
+  try{
+    var result=await window.storage.get('ksu_shared_reviews',true);
+    if(result&&result.value){
+      sharedCache=JSON.parse(result.value);
+    }
+  }catch(e){sharedCache={};}
+  sharedLoaded=true;
+}
+
+// 共有データを保存（全件をまとめて1キーに）
+async function saveShared(){
+  try{
+    await window.storage.set('ksu_shared_reviews',JSON.stringify(sharedCache),true);
+  }catch(e){console.warn('shared save failed',e);}
+}
+
+// 指定コードの共有データを取得（キャッシュから）
+function GSC(c){return sharedCache[c]||{rat:0,dif:0,cmt:[]};}
+
+// 指定コードの共有データを更新してサーバーへ保存
+function SSC(c,d){sharedCache[c]=d;saveShared();}
+
+// 統合GD: 個人データ+共有データをマージして返す
+function GD(c){
+  var p=GDpersonal(c);
+  var s=GSC(c);
+  return {done:p.done,reg:p.reg,rat:s.rat||0,dif:s.dif||0,cmt:s.cmt||[]};
+}
+// 個人フィールド（done/reg）だけ保存
+function SDpersonalFields(c,done,reg){
+  var p=GDpersonal(c);
+  p.done=done;p.reg=reg;
+  SDpersonal(c,p);
+}
+// 共有フィールド（rat/dif/cmt）だけ保存
+function SDsharedFields(c,rat,dif,cmt){
+  var s=GSC(c);
+  s.rat=rat;s.dif=dif;s.cmt=cmt;
+  SSC(c,s);
+}
+// 旧互換: SD（個人データのみ更新）
+function SD(c,d){
+  var p=GDpersonal(c);
+  if(d.done!==undefined)p.done=d.done;
+  if(d.reg!==undefined)p.reg=d.reg;
+  SDpersonal(c,p);
+  // 共有フィールドがあれば共有側にも保存
+  if(d.rat!==undefined||d.dif!==undefined||d.cmt!==undefined){
+    var s=GSC(c);
+    if(d.rat!==undefined)s.rat=d.rat;
+    if(d.dif!==undefined)s.dif=d.dif;
+    if(d.cmt!==undefined)s.cmt=d.cmt;
+    SSC(c,s);
+  }
+}
 
 // ============================================================
 // HELPERS
@@ -604,9 +668,7 @@ function BC2(s){
   if(sd.rat>0)for(var i=1;i<=5;i++)rStr+=(i<=sd.rat?'<span style="color:#f1c40f;font-size:.73rem;">★</span>':'<span style="color:#bdc3c7;font-size:.73rem;">☆</span>');
   if(sd.dif>0){var dl=['','易','普通','やや難','難','激難'];dStr='<span style="background:#fde8e7;color:#c0392b;font-size:.67rem;border-radius:6px;padding:1px 5px;margin-left:4px;">'+dl[sd.dif]+'</span>'}
   var cCnt=sd.cmt&&sd.cmt.length?'<span style="font-size:.68rem;color:var(--muted);margin-left:4px;">💬'+sd.cmt.length+'件</span>':'';
-  var cmtHTML=sd.cmt&&sd.cmt.length?sd.cmt.map(function(c,i){
-    return '<div class="citm"><div class="cmta"><span>'+EH(c.dt||'')+'</span><button class="cdel" onclick="DC(\''+s.code+'\','+i+')">✕</button></div><div>'+EH(c.tx)+'</div></div>'
-  }).join(''):'<div class="ecmnt">口コミがまだありません</div>';
+  var cmtHTML=sd.cmt&&sd.cmt.length?renderCmts(s.code,sd.cmt):'<div class="ecmnt">口コミがまだありません</div>';
 
   var exemptBdg=s.exempt?'<span class="bdg bex">⚖️免除対象</span>':'';
   var reqBdg=s.required?'<span class="bdg breq">必修</span>':'';
@@ -699,7 +761,10 @@ function IS(code){
       s.onmouseover=function(){UDS(wrap,i+1,tp,true)};
       s.onmouseout=function(){var d2=GD(code);UDS(wrap,tp==='rat'?(d2.rat||0):(d2.dif||0),tp)};
       s.onclick=function(){
-        var d2=GD(code);d2[tp]=i+1;SD(code,d2);UDS(wrap,i+1,tp);
+        var d2=GD(code);
+        var s2=GSC(code);
+        s2[tp]=i+1;SSC(code,s2);
+        UDS(wrap,i+1,tp);
         var lbl=document.getElementById((tp==='rat'?'RL':'FL')+code);
         if(lbl){if(tp==='rat')lbl.textContent=(i+1)+'/5';else lbl.textContent=['','易','普通','やや難','難','激難'][i+1]}
         RC();
@@ -714,7 +779,21 @@ function UDS(wrap,val,tp){
 function XP(code){
   var el=document.getElementById('X'+code);if(!el)return;
   var was=el.classList.contains('open');el.classList.toggle('open');
-  if(!was)IS(code);
+  if(!was){
+    // 展開時に最新共有データを取得してから星・口コミを更新
+    loadShared().then(function(){
+      IS(code);
+      // 口コミ欄を最新に更新
+      var s=GSC(code);
+      var cl=document.getElementById('CM'+code);
+      if(cl)cl.innerHTML=s.cmt&&s.cmt.length?renderCmts(code,s.cmt):'<div class="ecmnt">口コミがまだありません</div>';
+      // 星ラベルも更新
+      var rlbl=document.getElementById('RL'+code);
+      if(rlbl)rlbl.textContent=s.rat?s.rat+'/5':'未評価';
+      var flbl=document.getElementById('FL'+code);
+      if(flbl)flbl.textContent=s.dif?['','易','普通','やや難','難','激難'][s.dif]:'未評価';
+    });
+  }
 }
 function QD(code){
   var d=GD(code);d.done=!d.done;SD(code,d);
@@ -767,18 +846,24 @@ function TC(code){
 }
 function AC(code){
   var inp=document.getElementById('CI'+code);if(!inp||!inp.value.trim())return;
-  var d=GD(code);if(!d.cmt)d.cmt=[];
+  var s=GSC(code);if(!s.cmt)s.cmt=[];
   var now=new Date();
   var dt=now.getFullYear()+'/'+(now.getMonth()+1<10?'0':'')+(now.getMonth()+1)+'/'+(now.getDate()<10?'0':'')+now.getDate();
-  d.cmt.unshift({tx:inp.value.trim(),dt:dt});SD(code,d);inp.value='';
+  s.cmt.unshift({tx:inp.value.trim(),dt:dt});SSC(code,s);inp.value='';
   var cl=document.getElementById('CM'+code);
-  if(cl)cl.innerHTML=d.cmt.map(function(c,i){return '<div class="citm"><div class="cmta"><span>'+EH(c.dt)+'</span><button class="cdel" onclick="DC(\''+code+'\','+i+')">✕</button></div><div>'+EH(c.tx)+'</div></div>'}).join('');
+  if(cl)cl.innerHTML=renderCmts(code,s.cmt);
 }
 function DC(code,idx){
   if(!confirm('このコメントを削除しますか？'))return;
-  var d=GD(code);d.cmt.splice(idx,1);SD(code,d);
+  var s=GSC(code);if(!s.cmt)s.cmt=[];
+  s.cmt.splice(idx,1);SSC(code,s);
   var cl=document.getElementById('CM'+code);
-  if(cl)cl.innerHTML=d.cmt.length?d.cmt.map(function(c,i){return '<div class="citm"><div class="cmta"><span>'+EH(c.dt)+'</span><button class="cdel" onclick="DC(\''+code+'\','+i+')">✕</button></div><div>'+EH(c.tx)+'</div></div>'}).join(''):'<div class="ecmnt">口コミがまだありません</div>';
+  if(cl)cl.innerHTML=s.cmt.length?renderCmts(code,s.cmt):'<div class="ecmnt">口コミがまだありません</div>';
+}
+function renderCmts(code,cmts){
+  return cmts.map(function(c,i){
+    return '<div class="citm"><div class="cmta"><span>'+EH(c.dt||'')+'</span><button class="cdel" onclick="DC(\''+code+'\','+i+')">✕</button></div><div>'+EH(c.tx)+'</div></div>';
+  }).join('');
 }
 
 // ============================================================
@@ -1001,7 +1086,12 @@ function switchTab(id){
 // INIT
 // ============================================================
 document.getElementById('si').addEventListener('input',function(){st.q=this.value;RC()});
-RC();UPD();
+// 起動時: 共有データ取得→描画
+loadShared().then(function(){
+  RC();UPD();
+}).catch(function(){
+  RC();UPD();
+});
 </script>
 </body>
 </html>
