@@ -278,6 +278,9 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
     <button class="fbtn" data-gf="bas" onclick="GF('bas')">基本</button>
     <button class="fbtn" data-gf="dev" onclick="GF('dev')">発展</button>
     <button class="fbtn" data-gf="app" onclick="GF('app')">応用</button>
+    <span class="glbl">免除：</span>
+    <button class="fbtn on" data-ef="all" onclick="EF('all')">全て</button>
+    <button class="fbtn" data-ef="only" onclick="EF('only')">⚖️ 対象のみ</button>
     <button class="fbtn" data-hm="done" onclick="HM('done')">🙈 履修済を除く</button>
     <button class="fbtn" data-hm="done_reg" onclick="HM('done_reg')">🙈 済・登録済を除く</button>
     <select class="srt" id="ss" onchange="RC()">
@@ -286,7 +289,6 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
       <option value="group">科目群順</option>
       <option value="rate">おすすめ度順</option>
       <option value="dif">難易度順</option>
-      <option value="exempt">免除対象優先</option>
       <option value="cred">単位数順</option>
     </select>
   </div>
@@ -573,7 +575,7 @@ var D=[
 // ============================================================
 // STATE & STORAGE
 // ============================================================
-var st={sf:'all',yf:'all',gf:'all',hm:'none',q:''};
+var st={sf:'all',yf:'all',gf:'all',hm:'none',ef:'all',q:''};
 var ttSem='sp';
 var ttView='mine';
 
@@ -678,11 +680,15 @@ function SF(v){
 function YF(v){st.yf=v;document.querySelectorAll('[data-yf]').forEach(function(b){b.classList.toggle('on',b.dataset.yf===v)});RC()}
 function GF(v){st.gf=v;document.querySelectorAll('[data-gf]').forEach(function(b){b.classList.toggle('on',b.dataset.gf===v)});RC()}
 function HM(v){
-  // 同じボタンを押したらトグル解除
   st.hm=(st.hm===v)?'none':v;
   document.querySelectorAll('[data-hm]').forEach(function(b){
     b.classList.toggle('on',b.dataset.hm===st.hm);
   });
+  RC();
+}
+function EF(v){
+  st.ef=v;
+  document.querySelectorAll('[data-ef]').forEach(function(b){b.classList.toggle('on',b.dataset.ef===v)});
   RC();
 }
 
@@ -759,6 +765,7 @@ function RC(){
     if(st.yf==='2'&&s.year!=='２年次')return false;
     if(st.gf!=='all'&&s.group!==st.gf)return false;
     var _sd=GD(s.code);
+    if(st.ef==='only'&&!s.exempt)return false;
     if(st.hm==='done'&&_sd.done)return false;
     if(st.hm==='done_reg'&&(_sd.done||_sd.reg))return false;
     if(q&&s.name.toLowerCase().indexOf(q)<0&&s.teacher.toLowerCase().indexOf(q)<0&&s.code.indexOf(q)<0)return false;
