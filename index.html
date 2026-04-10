@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>関大 会計専門職大学院 シラバス管理</title>
+<style>
+:root{
+  --primary:#1a3a6b;--primary-light:#2a5298;--accent:#e67e22;
+  --spring:#27ae60;--autumn:#e74c3c;--year:#8e44ad;
+  --bg:#f0f2f7;--card:#fff;--border:#dce3ee;--text:#2c3e50;--muted:#7f8c9a;
+  --shadow:0 2px 8px rgba(0,0,0,.08);--shadow-h:0 6px 20px rgba(0,0,0,.14);
+  /* 系統カラー */
+  --c-fa:#1565c0;--c-ma:#2e7d32;--c-au:#6a1b9a;--c-la:#e65100;--c-ec:#00695c;--c-ot:#37474f;
+  /* 科目群カラー */
+  --g-int:#78909c;--g-bas:#1976d2;--g-dev:#7b1fa2;--g-app:#d32f2f;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+
+/* ===== HEADER ===== */
+.hdr{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:14px 20px;position:sticky;top:0;z-index:100;box-shadow:0 3px 12px rgba(0,0,0,.2)}
+.hdr h1{font-size:1.1rem;font-weight:700}
+.hdr p{font-size:.73rem;opacity:.8;margin-top:2px}
+
+/* ===== TABS ===== */
+.tabs{background:#fff;border-bottom:2px solid var(--border);display:flex;gap:0}
+.tab{padding:10px 20px;font-size:.82rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;color:var(--muted);transition:all .2s;font-family:inherit;background:none;border-top:none;border-left:none;border-right:none}
+.tab.on{border-bottom-color:var(--primary);color:var(--primary)}
+.tab-pane{display:none}.tab-pane.on{display:block}
+
+/* ===== STAT BAR ===== */
+.sbar{background:#fff;border-bottom:2px solid var(--border);padding:10px 20px;display:flex;gap:0;flex-wrap:wrap}
+.sbar-section{display:flex;gap:16px;align-items:center;padding:4px 20px 4px 0;border-right:1px solid var(--border);margin-right:16px;flex-wrap:wrap}
+.sbar-section:last-child{border-right:none}
+.sbar-label{font-size:.62rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.stat-item{text-align:center}
+.snum{font-size:1.3rem;font-weight:800;line-height:1}
+.slbl{font-size:.63rem;color:var(--muted);margin-top:1px}
+.snum.g{color:var(--spring)}.snum.o{color:var(--accent)}.snum.p{color:var(--primary)}.snum.r{color:var(--c-au)}
+
+/* progress */
+.prog-wrap{min-width:140px}
+.prog-label{font-size:.68rem;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:3px}
+.pbg{background:var(--border);border-radius:8px;height:8px;overflow:hidden}
+.pfill{height:100%;border-radius:8px;transition:width .5s}
+.pfill.green{background:linear-gradient(90deg,var(--spring),#2ecc71)}
+.pfill.blue{background:linear-gradient(90deg,#1976d2,#42a5f5)}
+.pfill.purple{background:linear-gradient(90deg,#7b1fa2,#ba68c8)}
+.pfill.orange{background:linear-gradient(90deg,var(--accent),#f39c12)}
+
+/* ===== REQUIREMENT CARDS ===== */
+.req-area{padding:12px 16px;max-width:960px;margin:0 auto}
+.req-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-bottom:12px}
+.req-card{background:#fff;border-radius:12px;padding:14px;box-shadow:var(--shadow);border:1.5px solid var(--border)}
+.req-card.warn{border-color:#ff9800;background:#fff8e1}
+.req-card.ok{border-color:var(--spring);background:#f0fbf4}
+.req-ttl{font-size:.82rem;font-weight:800;color:var(--primary);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.req-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.req-name{font-size:.75rem;color:var(--text)}
+.req-val{font-size:.82rem;font-weight:700}
+.req-val.ok{color:var(--spring)}.req-val.ng{color:var(--autumn)}.req-val.near{color:var(--accent)}
+
+/* 短答免除 */
+.tanshort-card{background:#fff;border-radius:12px;padding:14px;box-shadow:var(--shadow);border:1.5px solid var(--border);margin-bottom:12px}
+.tanshort-ttl{font-size:.85rem;font-weight:800;color:#4a148c;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.ts-item{background:#f3e5f5;border-radius:8px;padding:10px;text-align:center}
+.ts-name{font-size:.7rem;color:#6a1b9a;font-weight:700;margin-bottom:4px}
+.ts-num{font-size:1.4rem;font-weight:800;color:#4a148c;line-height:1}
+.ts-sub{font-size:.65rem;color:#9c27b0}
+.ts-total{background:#ede7f6;border-radius:8px;padding:10px;display:flex;justify-content:space-between;align-items:center}
+.ts-total-label{font-size:.78rem;font-weight:700;color:#4a148c}
+.ts-total-val{font-size:1.1rem;font-weight:800}
+.ts-note{font-size:.68rem;color:var(--muted);margin-top:6px;line-height:1.4}
+
+/* 科目群別バー */
+.group-bars{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gbar-item{background:var(--bg);border-radius:8px;padding:8px 10px}
+.gbar-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.gbar-name{font-size:.72rem;font-weight:700}
+.gbar-val{font-size:.72rem;color:var(--muted)}
+.pbg.sm{height:6px}
+
+/* ===== FILTER AREA ===== */
+.farea{background:#fff;padding:10px 20px;border-bottom:1px solid var(--border);display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.fbtn{border:2px solid var(--border);background:#fff;border-radius:20px;padding:4px 13px;font-size:.78rem;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--muted);font-weight:500}
+.fbtn.on{border-color:var(--primary);color:var(--primary);background:#eef2ff;font-weight:700}
+.fbtn.sp.on{border-color:var(--spring);color:var(--spring);background:#e8f8f0}
+.fbtn.au.on{border-color:var(--autumn);color:var(--autumn);background:#fdecea}
+.fbtn.cm.on{border-color:var(--accent);color:var(--accent);background:#fef3e7}
+.srch{flex:1;min-width:150px;border:2px solid var(--border);border-radius:20px;padding:5px 13px;font-size:.8rem;outline:none;font-family:inherit;transition:border-color .2s}
+.srch:focus{border-color:var(--primary)}
+.srt{border:2px solid var(--border);background:#fff;border-radius:20px;padding:5px 11px;font-size:.78rem;cursor:pointer;font-family:inherit;color:var(--text);outline:none}
+.glbl{font-size:.7rem;color:var(--muted);font-weight:600;white-space:nowrap}
+
+/* ===== CARD LIST ===== */
+.lst{padding:12px 16px;max-width:960px;margin:0 auto}
+.crd{background:#fff;border-radius:12px;margin-bottom:8px;box-shadow:var(--shadow);border:1.5px solid var(--border);transition:all .2s;overflow:hidden}
+.crd:hover{box-shadow:var(--shadow-h);transform:translateY(-1px)}
+.crd.done{border-color:var(--spring);background:#f0fbf4}
+.crd.hid{display:none}
+.chdr{padding:10px 14px;display:flex;align-items:flex-start;gap:10px;cursor:pointer}
+.chk{padding-top:2px}
+.chk input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:var(--spring)}
+.cmain{flex:1;min-width:0}
+.ctrow{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.cname{font-weight:700;font-size:.88rem}
+.ccode{font-size:.68rem;color:var(--muted);background:var(--bg);border-radius:4px;padding:1px 5px}
+
+/* バッジ */
+.bdg{font-size:.65rem;border-radius:8px;padding:2px 6px;font-weight:700;white-space:nowrap}
+/* 学期 */
+.bsp{background:#d5f5e3;color:#1e8449}.bau{background:#fde8e7;color:#c0392b}
+.byr{background:#e8daef;color:#6c3483}.bot{background:#eaf0fb;color:#2980b9}
+/* 年次 */
+.by1{background:#fff3cd;color:#856404}.by2{background:#d1ecf1;color:#0c5460}
+/* 科目群 */
+.bg-int{background:#eceff1;color:#455a64}.bg-bas{background:#e3f2fd;color:#0d47a1}
+.bg-dev{background:#f3e5f5;color:#4a148c}.bg-app{background:#fce4ec;color:#880e4f}
+/* 系統 */
+.bs-fa{background:#e3f2fd;color:#1565c0}.bs-ma{background:#e8f5e9;color:#2e7d32}
+.bs-au{background:#f3e5f5;color:#6a1b9a}.bs-la{background:#fff3e0;color:#e65100}
+.bs-ec{background:#e0f2f1;color:#00695c}.bs-ot{background:#eceff1;color:#37474f}
+/* 免除対象 */
+.bex{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
+/* 必修 */
+.breq{background:#fce4ec;color:#880e4f}
+/* 済み */
+.bdone{background:#d5f5e3;color:#1e8449;font-size:.65rem;border-radius:8px;padding:1px 6px;font-weight:700}
+.bcred{background:#e8eaf6;color:#3949ab;font-size:.67rem;border-radius:8px;padding:1px 6px;font-weight:600}
+
+.cmeta{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;align-items:center}
+.mitem{font-size:.71rem;color:var(--muted)}
+.xpnd{padding:0 14px 14px;border-top:1px solid var(--border);display:none}
+.xpnd.open{display:block}
+.rvttl{font-size:.8rem;font-weight:700;color:var(--primary);margin:10px 0 8px}
+.rrow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.rlbl{font-size:.76rem;width:78px;color:var(--muted)}
+.sins{display:flex;gap:3px}
+.sins span{font-size:1.25rem;cursor:pointer;color:#bdc3c7;transition:color .15s;user-select:none}
+.sins span:hover{transform:scale(1.15)}
+.clist{max-height:150px;overflow-y:auto;margin-bottom:8px}
+.citm{background:var(--bg);border-radius:8px;padding:7px 9px;margin-bottom:6px;font-size:.78rem;position:relative}
+.cmta{color:var(--muted);font-size:.68rem;margin-bottom:3px;display:flex;justify-content:space-between;align-items:center}
+.cdel{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:0 3px}
+.cdel:hover{color:var(--autumn)}
+.cform{display:flex;flex-direction:column;gap:6px}
+.cinp{border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:.8rem;resize:vertical;min-height:58px;font-family:inherit;outline:none;transition:border-color .2s}
+.cinp:focus{border-color:var(--primary)}
+.bsub{align-self:flex-end;background:var(--primary);color:#fff;border:none;border-radius:8px;padding:6px 15px;font-size:.78rem;cursor:pointer;font-family:inherit;font-weight:600;transition:background .2s}
+.bsub:hover{background:var(--primary-light)}
+.nores{text-align:center;padding:40px 20px;color:var(--muted);font-size:.88rem}
+.ecmnt{color:var(--muted);font-size:.76rem;font-style:italic}
+
+/* ===== 時間割ビュー ===== */
+.tt-wrap{padding:12px 16px;overflow-x:auto}
+.tt-table{border-collapse:collapse;width:100%;min-width:700px;font-size:.75rem}
+.tt-table th,.tt-table td{border:1px solid var(--border);padding:4px 6px;text-align:center;vertical-align:top}
+.tt-table th{background:var(--primary);color:#fff;font-weight:700;font-size:.72rem}
+.tt-table .day-hdr{background:#eef2ff;color:var(--primary);font-weight:700}
+.tt-cell{min-height:52px;position:relative}
+.tt-item{background:#e3f2fd;border-radius:6px;padding:3px 5px;margin:2px 0;cursor:pointer;border-left:3px solid var(--c-fa);font-size:.68rem;line-height:1.3;text-align:left}
+.tt-item:hover{opacity:.85}
+.tt-item.done-item{opacity:.6;text-decoration:line-through}
+.tt-name{font-weight:700;color:#1a237e}
+.tt-teacher{color:var(--muted);font-size:.63rem}
+/* 系統別色 */
+.tt-item.s-fa{border-left-color:var(--c-fa);background:#e8f0fe}
+.tt-item.s-ma{border-left-color:var(--c-ma);background:#e8f5e9}
+.tt-item.s-au{border-left-color:var(--c-au);background:#f3e5f5}
+.tt-item.s-la{border-left-color:var(--c-la);background:#fff3e0}
+.tt-item.s-ec{border-left-color:var(--c-ec);background:#e0f2f1}
+.tt-item.s-ot{border-left-color:var(--c-ot);background:#eceff1}
+.tt-legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-size:.72rem}
+.tt-leg-item{display:flex;align-items:center;gap:4px}
+.tt-leg-dot{width:10px;height:10px;border-radius:2px}
+.tt-semester-tab{display:flex;gap:0;margin-bottom:10px}
+.tt-stab{padding:6px 16px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:.78rem;font-family:inherit;font-weight:600;color:var(--muted)}
+.tt-stab:first-child{border-radius:8px 0 0 8px}
+.tt-stab:last-child{border-radius:0 8px 8px 0}
+.tt-stab.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+@media(max-width:600px){
+  .sbar{padding:8px 12px;gap:8px}
+  .req-grid{grid-template-columns:1fr}
+  .ts-grid{grid-template-columns:1fr}
+  .group-bars{grid-template-columns:1fr}
+  .farea{padding:8px 12px}
+  .lst{padding:8px}
+  .chdr{padding:8px 10px}
+  .tabs .tab{padding:8px 12px;font-size:.75rem}
+}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>📚 関大 会計専門職大学院 シラバス管理</h1>
+  <p>2025年度カリキュラム ・ 履修管理・口コミ・難易度評価 ・ 卒業要件・短答免除トラッカー</p>
+</div>
+
+<!-- タブ -->
+<div class="tabs">
+  <button class="tab on" onclick="switchTab('list')">📋 科目一覧</button>
+  <button class="tab" onclick="switchTab('req')">🎯 要件チェック</button>
+  <button class="tab" onclick="switchTab('tt')">📅 時間割</button>
+</div>
+
+<!-- ===== 共通ステータスバー ===== -->
+<div class="sbar">
+  <div class="sbar-section">
+    <div class="stat-item"><div class="snum p" id="tc">0</div><div class="slbl">総単位</div></div>
+    <div class="stat-item"><div class="snum g" id="cc">0</div><div class="slbl">履修済み</div></div>
+    <div class="stat-item"><div class="snum o" id="rc">0</div><div class="slbl">残り</div></div>
+    <div class="stat-item"><div class="snum" id="cn">0</div><div class="slbl">履修科目数</div></div>
+  </div>
+  <div class="sbar-section">
+    <div class="prog-wrap">
+      <div class="prog-label"><span>卒業進捗</span><span id="pp">0%</span></div>
+      <div class="pbg"><div class="pfill green" id="pf" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="sbar-section">
+    <div class="prog-wrap">
+      <div class="prog-label"><span>短答免除</span><span id="ep">0/28単位</span></div>
+      <div class="pbg"><div class="pfill purple" id="ef" style="width:0%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB: 科目一覧 ===== -->
+<div id="tab-list" class="tab-pane on">
+  <div class="farea">
+    <input type="text" class="srch" id="si" placeholder="🔍 科目名・担当者で検索...">
+    <span class="glbl">学期：</span>
+    <button class="fbtn on" data-sf="all" onclick="SF('all')">全て</button>
+    <button class="fbtn sp" data-sf="sp" onclick="SF('sp')">春</button>
+    <button class="fbtn au" data-sf="au" onclick="SF('au')">秋</button>
+    <button class="fbtn" data-sf="yr" onclick="SF('yr')">通年</button>
+    <span class="glbl">年次：</span>
+    <button class="fbtn on" data-yf="all" onclick="YF('all')">全て</button>
+    <button class="fbtn" data-yf="1" onclick="YF('1')">１年次</button>
+    <button class="fbtn" data-yf="2" onclick="YF('2')">２年次</button>
+    <span class="glbl">科目群：</span>
+    <button class="fbtn on" data-gf="all" onclick="GF('all')">全て</button>
+    <button class="fbtn" data-gf="int" onclick="GF('int')">導入</button>
+    <button class="fbtn" data-gf="bas" onclick="GF('bas')">基本</button>
+    <button class="fbtn" data-gf="dev" onclick="GF('dev')">発展</button>
+    <button class="fbtn" data-gf="app" onclick="GF('app')">応用</button>
+    <button class="fbtn cm" data-cf="1" onclick="CF()">✅ 済のみ</button>
+    <select class="srt" id="ss" onchange="RC()">
+      <option value="code">コード順</option>
+      <option value="name">科目名順</option>
+      <option value="cred">単位数順</option>
+      <option value="rate">評価順</option>
+      <option value="group">科目群順</option>
+    </select>
+  </div>
+  <div class="lst" id="sl"></div>
+</div>
+
+<!-- ===== TAB: 要件チェック ===== -->
+<div id="tab-req" class="tab-pane">
+  <div class="req-area">
+
+    <!-- 卒業要件 -->
+    <div class="req-card" id="grad-card">
+      <div class="req-ttl">🎓 卒業要件（48単位以上）</div>
+      <div class="group-bars">
+        <div class="gbar-item">
+          <div class="gbar-head">
+            <span class="gbar-name" style="color:var(--c-fa)">📘 基本科目群</span>
+            <span class="gbar-val" id="g-bas-v">0/16単位</span>
+          </div>
+          <div class="pbg sm"><div class="pfill blue" id="g-bas-b" style="width:0%"></div></div>
+        </div>
+        <div class="gbar-item">
+          <div class="gbar-head">
+            <span class="gbar-name" style="color:var(--c-au)">📗 発展科目群</span>
+            <span class="gbar-val" id="g-dev-v">0/16単位</span>
+          </div>
+          <div class="pbg sm"><div class="pfill purple" id="g-dev-b" style="width:0%"></div></div>
+        </div>
+        <div class="gbar-item">
+          <div class="gbar-head">
+            <span class="gbar-name" style="color:var(--g-app)">📙 応用・実践科目群</span>
+            <span class="gbar-val" id="g-app-v">0/12単位</span>
+          </div>
+          <div class="pbg sm"><div class="pfill orange" id="g-app-b" style="width:0%"></div></div>
+        </div>
+        <div class="gbar-item">
+          <div class="gbar-head">
+            <span class="gbar-name" style="color:var(--muted)">合計（卒業算入分）</span>
+            <span class="gbar-val" id="g-tot-v">0/48単位</span>
+          </div>
+          <div class="pbg sm"><div class="pfill green" id="g-tot-b" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:10px;font-size:.71rem;color:var(--muted)">※ 中級商業簿記・中級工業簿記は卒業算入単位に含まれません</div>
+    </div>
+
+    <!-- 短答免除 -->
+    <div class="tanshort-card">
+      <div class="tanshort-ttl">⚖️ 公認会計士試験 短答式科目 免除条件</div>
+      <div class="ts-grid">
+        <div class="ts-item" id="ts-fa">
+          <div class="ts-name">財務会計系 (i)</div>
+          <div class="ts-num" id="ts-fa-v">0</div>
+          <div class="ts-sub">/ 10単位以上必要</div>
+          <div class="pfill blue" id="ts-fa-b" style="width:0%;height:4px;margin-top:4px;border-radius:4px"></div>
+        </div>
+        <div class="ts-item" id="ts-ma">
+          <div class="ts-name">管理会計系 (ii)</div>
+          <div class="ts-num" id="ts-ma-v">0</div>
+          <div class="ts-sub">/ 6単位以上必要</div>
+          <div class="pfill green" id="ts-ma-b" style="width:0%;height:4px;margin-top:4px;border-radius:4px"></div>
+        </div>
+        <div class="ts-item" id="ts-au">
+          <div class="ts-name">監査系 (iii)</div>
+          <div class="ts-num" id="ts-au-v">0</div>
+          <div class="ts-sub">/ 6単位以上必要</div>
+          <div class="pfill purple" id="ts-au-b" style="width:0%;height:4px;margin-top:4px;border-radius:4px"></div>
+        </div>
+      </div>
+      <div class="ts-total">
+        <span class="ts-total-label">合計免除対象単位</span>
+        <span class="ts-total-val" id="ts-tot">0 / 28単位以上 + 修了</span>
+      </div>
+      <div class="ts-note">※ 導入科目群（中級商業簿記・中級工業簿記）は免除申請科目に含まれません<br>※ 特殊講義（DX会計実務）・特殊講義（内部監査事例研究）は申請中（2025年4月現在）</div>
+    </div>
+
+    <!-- 要件詳細 -->
+    <div class="req-grid">
+      <div class="req-card" id="need-card">
+        <div class="req-ttl">⚠️ 充足状況チェック</div>
+        <div id="need-list"></div>
+      </div>
+      <div class="req-card">
+        <div class="req-ttl">📊 系統別履修状況</div>
+        <div id="system-list"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== TAB: 時間割 ===== -->
+<div id="tab-tt" class="tab-pane">
+  <div class="tt-wrap">
+    <div class="tt-semester-tab">
+      <button class="tt-stab on" onclick="TTSem('sp',this)">🌸 春学期</button>
+      <button class="tt-stab" onclick="TTSem('au',this)">🍂 秋学期</button>
+    </div>
+    <div class="tt-legend" id="tt-legend">
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:var(--c-fa)"></div>財務会計</div>
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:var(--c-ma)"></div>管理会計</div>
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:var(--c-au)"></div>監査</div>
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:var(--c-la)"></div>法律・税務</div>
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:var(--c-ec)"></div>経営・経済</div>
+      <div class="tt-leg-item"><div class="tt-leg-dot" style="background:var(--c-ot)"></div>横断・演習等</div>
+    </div>
+    <div id="tt-content"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA: 科目マスタ（系統・科目群・免除区分・必修区分を追加）
+// group: int=導入 bas=基本 dev=発展 app=応用実践
+// system: fa=財務会計 ma=管理会計 au=監査 la=法律税務 ec=経営経済 ot=横断等
+// exempt: true=免除申請対象（導入除く、申請中除く）
+// required: true=必修
+// ============================================================
+var D=[
+  // 導入科目群
+  {year:"１年次",name:"中級商業簿記",code:"97002",credits:2,class_:"A",teacher:"衣笠 茂英",schedule:"春学期 木2",group:"int",system:"fa",exempt:false,required:false},
+  {year:"１年次",name:"中級工業簿記",code:"97003",credits:2,class_:"A",teacher:"関本 明浩",schedule:"春学期 月2",group:"int",system:"ma",exempt:false,required:false},
+  // 基本科目群（必修）
+  {year:"１年次",name:"上級簿記論",code:"97004",credits:2,class_:"A01",teacher:"古田 美保",schedule:"春学期（隔週・クォーター） 月2/木3",group:"bas",system:"fa",exempt:true,required:true},
+  {year:"１年次",name:"上級簿記論",code:"97005",credits:2,class_:"A02",teacher:"古田 美保",schedule:"春学期（隔週・クォーター） 木2/月3",group:"bas",system:"fa",exempt:true,required:true},
+  {year:"１年次",name:"上級簿記論",code:"97006",credits:2,class_:"B",teacher:"古田 美保",schedule:"秋学期 木1",group:"bas",system:"fa",exempt:true,required:true},
+  {year:"１年次",name:"上級財務会計論",code:"97007",credits:2,class_:"A01",teacher:"富田 知嗣",schedule:"春学期（隔週・クォーター） 木2/月3",group:"bas",system:"fa",exempt:true,required:true},
+  {year:"１年次",name:"上級財務会計論",code:"97008",credits:2,class_:"A02",teacher:"富田 知嗣",schedule:"春学期（隔週・クォーター） 月2/木3",group:"bas",system:"fa",exempt:true,required:true},
+  {year:"１年次",name:"上級財務会計論",code:"97009",credits:2,class_:"B",teacher:"富田 知嗣",schedule:"秋学期 月1",group:"bas",system:"fa",exempt:true,required:true},
+  {year:"１年次",name:"上級原価計算論",code:"97010",credits:2,class_:"A01",teacher:"坂口 順也",schedule:"春学期（隔週・クォーター） 木2/月3",group:"bas",system:"ma",exempt:true,required:true},
+  {year:"１年次",name:"上級原価計算論",code:"97011",credits:2,class_:"A02",teacher:"坂口 順也",schedule:"春学期（隔週・クォーター） 月2/木3",group:"bas",system:"ma",exempt:true,required:true},
+  {year:"１年次",name:"上級原価計算論",code:"97012",credits:2,class_:"B",teacher:"坂口 順也",schedule:"秋学期 火2",group:"bas",system:"ma",exempt:true,required:true},
+  {year:"１年次",name:"上級管理会計論",code:"97013",credits:2,class_:"A01",teacher:"大西 靖",schedule:"春学期（隔週・クォーター） 月2/木3",group:"bas",system:"ma",exempt:true,required:true},
+  {year:"１年次",name:"上級管理会計論",code:"97014",credits:2,class_:"A02",teacher:"大西 靖",schedule:"春学期（隔週・クォーター） 木2/月3",group:"bas",system:"ma",exempt:true,required:true},
+  {year:"１年次",name:"上級管理会計論",code:"97015",credits:2,class_:"B",teacher:"大西 靖",schedule:"秋学期 木4",group:"bas",system:"ma",exempt:true,required:true},
+  {year:"１年次",name:"監査制度論",code:"97016",credits:2,class_:"A01",teacher:"松本 祥尚",schedule:"春学期（隔週・クォーター） 火2/金3",group:"bas",system:"au",exempt:true,required:true},
+  {year:"１年次",name:"監査制度論",code:"97017",credits:2,class_:"A02",teacher:"松本 祥尚",schedule:"春学期（隔週・クォーター） 金2/火3",group:"bas",system:"au",exempt:true,required:true},
+  {year:"１年次",name:"監査制度論",code:"97018",credits:2,class_:"B",teacher:"松本 祥尚",schedule:"秋学期 金4",group:"bas",system:"au",exempt:true,required:true},
+  {year:"１年次",name:"監査基準論",code:"97019",credits:2,class_:"A01",teacher:"田中 基博",schedule:"春学期 水2",group:"bas",system:"au",exempt:true,required:true},
+  {year:"１年次",name:"監査基準論",code:"97020",credits:2,class_:"A02",teacher:"田中 基博",schedule:"春学期 水3",group:"bas",system:"au",exempt:true,required:true},
+  {year:"１年次",name:"監査基準論",code:"97021",credits:2,class_:"B",teacher:"田中 基博",schedule:"秋学期 水1",group:"bas",system:"au",exempt:true,required:true},
+  {year:"１年次",name:"企業法",code:"97022",credits:2,class_:"A01",teacher:"三島 徹也",schedule:"春学期（隔週・クォーター） 火2/金3",group:"bas",system:"la",exempt:true,required:true},
+  {year:"１年次",name:"企業法",code:"97023",credits:2,class_:"A02",teacher:"三島 徹也",schedule:"春学期（隔週・クォーター） 金2/火3",group:"bas",system:"la",exempt:true,required:true},
+  {year:"１年次",name:"企業法",code:"97024",credits:2,class_:"B",teacher:"三島 徹也",schedule:"秋学期 金1",group:"bas",system:"la",exempt:true,required:true},
+  {year:"２年次",name:"会計専門職業倫理",code:"97025",credits:2,class_:"A01",teacher:"廣田 壽俊",schedule:"春学期 金3",group:"bas",system:"au",exempt:true,required:true},
+  {year:"２年次",name:"会計専門職業倫理",code:"97026",credits:2,class_:"A02",teacher:"小林 依子",schedule:"春学期 水2",group:"bas",system:"au",exempt:true,required:true},
+  {year:"２年次",name:"会計専門職業倫理",code:"97027",credits:2,class_:"B",teacher:"廣田 壽俊",schedule:"秋学期 木2",group:"bas",system:"au",exempt:true,required:true},
+  // 発展科目群（選択必修）
+  {year:"１年次",name:"会計基準論",code:"97028",credits:2,class_:"",teacher:"富田 知嗣",schedule:"春学期 火1",group:"dev",system:"fa",exempt:true,required:false},
+  {year:"１年次",name:"会計制度論",code:"97029",credits:2,class_:"",teacher:"古田 美保",schedule:"秋学期 月4",group:"dev",system:"fa",exempt:true,required:false},
+  {year:"１年次",name:"財表作成簿記論",code:"97030",credits:2,class_:"",teacher:"乾 将太",schedule:"秋学期 金3",group:"dev",system:"fa",exempt:true,required:false},
+  {year:"１年次",name:"戦略管理会計論",code:"97031",credits:2,class_:"",teacher:"坂口 順也",schedule:"秋学期 火3",group:"dev",system:"ma",exempt:true,required:false},
+  {year:"１年次",name:"企業分析論",code:"97032",credits:2,class_:"",teacher:"安福 健也",schedule:"春学期（隔週・クォーター） 土1/土2",group:"dev",system:"ma",exempt:true,required:false},
+  {year:"１年次",name:"監査実施論",code:"97033",credits:2,class_:"",teacher:"山田 善隆",schedule:"秋学期 水3",group:"dev",system:"au",exempt:true,required:false},
+  {year:"１年次",name:"監査報告論",code:"97034",credits:2,class_:"",teacher:"松本 祥尚",schedule:"秋学期 火4",group:"dev",system:"au",exempt:true,required:false},
+  {year:"１年次",name:"商取引法",code:"97035",credits:2,class_:"",teacher:"三島 徹也",schedule:"春学期 木1",group:"dev",system:"la",exempt:true,required:false},
+  {year:"１年次",name:"会社法",code:"97036",credits:2,class_:"",teacher:"三島 徹也",schedule:"秋学期 木2",group:"dev",system:"la",exempt:true,required:false},
+  {year:"１年次",name:"民法",code:"97037",credits:2,class_:"",teacher:"堀竹 学",schedule:"秋学期 水4",group:"dev",system:"la",exempt:true,required:false},
+  {year:"１年次",name:"法人税法",code:"97038",credits:2,class_:"",teacher:"中村 繁隆",schedule:"春学期 火4",group:"dev",system:"la",exempt:true,required:false},
+  {year:"１年次",name:"上級税務会計論",code:"97039",credits:2,class_:"",teacher:"古田 美保",schedule:"春学期 月4",group:"dev",system:"la",exempt:true,required:false},
+  {year:"１年次",name:"経営学理論",code:"97040",credits:2,class_:"",teacher:"高階 利徳",schedule:"秋学期 月3",group:"dev",system:"ec",exempt:true,required:false},
+  {year:"１年次",name:"経営戦略・組織論",code:"97041",credits:2,class_:"",teacher:"筒井 万理子",schedule:"秋学期 金2",group:"dev",system:"ec",exempt:true,required:false},
+  {year:"１年次",name:"統計学",code:"97042",credits:2,class_:"",teacher:"松尾 精彦",schedule:"秋学期 木3",group:"dev",system:"ec",exempt:true,required:false},
+  {year:"１年次",name:"ミクロ経済学",code:"97043",credits:2,class_:"",teacher:"広瀬 憲三",schedule:"秋学期 火1",group:"dev",system:"ec",exempt:true,required:false},
+  // 特殊講義（発展・1年次）
+  {year:"１年次",name:"特殊講義（コンサルティング実務）",code:"97114",credits:2,class_:"",teacher:"吉良 勝明",schedule:"秋学期（隔週・クォーター） 土1/土2",group:"dev",system:"ma",exempt:true,required:false},
+  {year:"１年次",name:"特殊講義（経営学）",code:"97119",credits:2,class_:"",teacher:"乾 将太",schedule:"春学期 金1",group:"dev",system:"ec",exempt:true,required:false},
+  {year:"１年次",name:"特殊講義（内部監査事例研究）",code:"97118",credits:2,class_:"",teacher:"香田 加良子",schedule:"秋学期 火3",group:"dev",system:"au",exempt:false,required:false}, // 申請中
+  {year:"１年次",name:"特殊講義（DX会計実務）",code:"97115",credits:2,class_:"",teacher:"香田 加良子",schedule:"秋学期 火4",group:"dev",system:"ma",exempt:false,required:false}, // 申請中
+  {year:"１年次",name:"特殊講義（会計専門職キャリア教育）",code:"97001",credits:2,class_:"",teacher:"松本 祥尚 他",schedule:"冬季集中 他",group:"dev",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"特殊講義（財務会計各論）",code:"97113",credits:2,class_:"",teacher:"乾 将太",schedule:"秋学期 金2",group:"dev",system:"fa",exempt:true,required:false},
+  {year:"１年次",name:"特殊講義（連結会計論）",code:"97112",credits:2,class_:"",teacher:"乾 将太",schedule:"春学期 金4",group:"dev",system:"fa",exempt:true,required:false},
+  {year:"１年次",name:"特殊講義（公会計論）",code:"97109",credits:2,class_:"",teacher:"瓦田 沙季",schedule:"秋学期 金3",group:"dev",system:"au",exempt:true,required:false},
+  {year:"１年次",name:"特殊講義（会計検査制度論）",code:"97117",credits:2,class_:"",teacher:"柳瀬 太郎",schedule:"秋学期（隔週・クォーター） 土1/土2",group:"dev",system:"au",exempt:true,required:false},
+  {year:"１年次",name:"特殊講義（BATIC演習）",code:"97110",credits:2,class_:"",teacher:"松井 隆雄",schedule:"秋学期 水2",group:"dev",system:"fa",exempt:true,required:false},
+  {year:"１年次",name:"特殊講義（IFRS演習）",code:"97111",credits:2,class_:"",teacher:"安福 健也",schedule:"秋学期（隔週・クォーター） 土1/土2",group:"dev",system:"fa",exempt:true,required:false},
+  {year:"１年次",name:"特殊講義（自治体マネジメントと監査）",code:"97116",credits:2,class_:"",teacher:"金 志煥",schedule:"春学期 月4",group:"dev",system:"au",exempt:true,required:false},
+  {year:"１年次",name:"特殊講義（民法［債権］）",code:"97124",credits:2,class_:"",teacher:"堀竹 学",schedule:"春学期 水4",group:"dev",system:"la",exempt:true,required:false},
+  {year:"１年次",name:"特殊講義（資本市場論）",code:"97125",credits:2,class_:"",teacher:"小林 依子",schedule:"春学期 水3",group:"dev",system:"ec",exempt:true,required:false},
+  {year:"１年次",name:"特殊講義（不正摘発監査論）",code:"97122",credits:2,class_:"",teacher:"香田 加良子",schedule:"春学期 火3",group:"dev",system:"au",exempt:true,required:false},
+  {year:"１年次",name:"特殊講義（国際監査事例研究）",code:"97123",credits:2,class_:"",teacher:"飯田 俊治",schedule:"秋学期（隔週・クォーター） 土3/土4",group:"dev",system:"au",exempt:true,required:false},
+  {year:"１年次",name:"特殊講義（起業・株式公開事例研究）",code:"97126",credits:2,class_:"",teacher:"荒井 巌 他",schedule:"春学期 月4",group:"dev",system:"ec",exempt:true,required:false},
+  {year:"１年次",name:"特殊講義（企業マネジメントと会計）",code:"97121",credits:2,class_:"",teacher:"廣田 壽俊",schedule:"秋学期 木3",group:"dev",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"特殊講義（会計専門職業数学）",code:"97120",credits:2,class_:"",teacher:"韓 池",schedule:"春学期 月1",group:"dev",system:"ot",exempt:false,required:false},
+  // 発展科目群（2年次）
+  {year:"２年次",name:"英文会計論",code:"97044",credits:2,class_:"",teacher:"浅野 信博",schedule:"秋学期 木1",group:"dev",system:"fa",exempt:true,required:false},
+  {year:"２年次",name:"IFRS会計論",code:"97045",credits:2,class_:"",teacher:"富田 知嗣",schedule:"春学期 月1",group:"dev",system:"fa",exempt:true,required:false},
+  {year:"２年次",name:"組織再編会計論",code:"97046",credits:2,class_:"",teacher:"久保田 浩文",schedule:"秋学期（隔週・クォーター） 土1/土2",group:"dev",system:"fa",exempt:true,required:false},
+  {year:"２年次",name:"コストマネジメント論",code:"97047",credits:2,class_:"",teacher:"榎本 成一",schedule:"秋学期 月2",group:"dev",system:"ma",exempt:true,required:false},
+  {year:"２年次",name:"企業価値マネジメント論",code:"97048",credits:2,class_:"",teacher:"濱村 純平",schedule:"春学期 木3",group:"dev",system:"ma",exempt:true,required:false},
+  {year:"２年次",name:"マネジメント・コントロール・システム論",code:"97049",credits:2,class_:"",teacher:"新井 康平",schedule:"春学期 火2",group:"dev",system:"ma",exempt:true,required:false},
+  {year:"２年次",name:"内部監査論",code:"97050",credits:2,class_:"",teacher:"吉良 勝明",schedule:"春学期 土1",group:"dev",system:"au",exempt:true,required:false},
+  {year:"２年次",name:"国際監査基準論",code:"97051",credits:2,class_:"",teacher:"笠井 直樹",schedule:"春学期 金2",group:"dev",system:"au",exempt:true,required:false},
+  {year:"２年次",name:"上級会社法",code:"97052",credits:2,class_:"",teacher:"三島 徹也",schedule:"春学期 木2",group:"dev",system:"la",exempt:true,required:false},
+  {year:"２年次",name:"租税法理論",code:"97053",credits:2,class_:"",teacher:"中村 繁隆",schedule:"秋学期 火4",group:"dev",system:"la",exempt:true,required:false},
+  {year:"２年次",name:"租税法会計論",code:"97054",credits:2,class_:"",teacher:"中村 繁隆",schedule:"秋学期 月4",group:"dev",system:"la",exempt:true,required:false},
+  {year:"２年次",name:"国際税務論",code:"97055",credits:2,class_:"",teacher:"中村 繁隆",schedule:"春学期 木4",group:"dev",system:"la",exempt:true,required:false},
+  {year:"２年次",name:"コーポレート・ファイナンス論",code:"97056b",credits:2,class_:"",teacher:"宗岡 徹",schedule:"秋学期 月1",group:"dev",system:"ec",exempt:true,required:false},
+  {year:"２年次",name:"インベストメント論",code:"97056c",credits:2,class_:"",teacher:"宗岡 徹",schedule:"春学期 火1",group:"dev",system:"ec",exempt:true,required:false},
+  {year:"２年次",name:"マクロ経済学",code:"97056",credits:2,class_:"",teacher:"広瀬 憲三",schedule:"春学期 火1",group:"dev",system:"ec",exempt:true,required:false},
+  // 応用・実践科目群（1年次）
+  {year:"１年次",name:"基本会計プログラム演習",code:"97057",credits:2,class_:"01",teacher:"富田 知嗣",schedule:"秋学期 月3",group:"app",system:"fa",exempt:false,required:false},
+  {year:"１年次",name:"基本会計プログラム演習",code:"97058",credits:2,class_:"02",teacher:"富田 知嗣",schedule:"秋学期 火1",group:"app",system:"fa",exempt:false,required:false},
+  {year:"１年次",name:"会計事例研究",code:"97059",credits:2,class_:"",teacher:"廣田 壽俊",schedule:"春学期 金4",group:"app",system:"fa",exempt:false,required:false},
+  {year:"１年次",name:"会社経理実務",code:"97060",credits:2,class_:"",teacher:"池上 しのぶ",schedule:"秋学期（隔週・クォーター） 土3/土4",group:"app",system:"fa",exempt:false,required:false},
+  {year:"１年次",name:"管理会計事例研究",code:"97061",credits:2,class_:"",teacher:"早川 翔",schedule:"春学期 月1",group:"app",system:"ma",exempt:false,required:false},
+  {year:"１年次",name:"監査事例研究",code:"97062",credits:2,class_:"",teacher:"田中 基博",schedule:"秋学期 水2",group:"app",system:"au",exempt:false,required:false},
+  {year:"１年次",name:"基本監査プログラム演習",code:"97063",credits:2,class_:"",teacher:"松本 祥尚",schedule:"秋学期 月2",group:"app",system:"au",exempt:false,required:false},
+  {year:"１年次",name:"アカデミック・ソリューション",code:"97064",credits:2,class_:"01",teacher:"富田 知嗣",schedule:"通年（隔週） 月5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"アカデミック・ソリューション",code:"97065",credits:2,class_:"02",teacher:"中村 繁隆",schedule:"通年（隔週） 月5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"アカデミック・ソリューション",code:"97066",credits:2,class_:"03",teacher:"松本 祥尚",schedule:"通年（隔週） 月5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"アカデミック・ソリューション",code:"97067",credits:2,class_:"04",teacher:"三島 徹也",schedule:"通年（隔週） 月5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"アカデミック・ソリューション",code:"97068",credits:2,class_:"05",teacher:"坂口 順也",schedule:"通年（隔週） 月5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"アカデミック・ソリューション",code:"97069",credits:2,class_:"07",teacher:"古田 美保",schedule:"通年（隔週） 月5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"論文指導（導入）",code:"97070",credits:2,class_:"02",teacher:"坂口 順也",schedule:"春学期 木5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"論文指導（導入）",code:"97071",credits:2,class_:"03",teacher:"中村 繁隆",schedule:"春学期 火5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"論文指導（導入）",code:"97072",credits:2,class_:"04",teacher:"松本 祥尚",schedule:"春学期 木5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"論文指導（導入）",code:"97073",credits:2,class_:"05",teacher:"富田 知嗣",schedule:"春学期 木5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"論文指導（導入）",code:"97074",credits:2,class_:"06",teacher:"三島 徹也",schedule:"春学期 木5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"論文指導（導入）",code:"97075",credits:2,class_:"07",teacher:"古田 美保",schedule:"春学期 木5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"論文指導（基礎）",code:"97076",credits:2,class_:"02",teacher:"坂口 順也",schedule:"秋学期 木5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"論文指導（基礎）",code:"97077",credits:2,class_:"03",teacher:"中村 繁隆",schedule:"秋学期 火5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"論文指導（基礎）",code:"97078",credits:2,class_:"04",teacher:"松本 祥尚",schedule:"秋学期 木5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"論文指導（基礎）",code:"97079",credits:2,class_:"05",teacher:"富田 知嗣",schedule:"秋学期 木5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"論文指導（基礎）",code:"97080",credits:2,class_:"06",teacher:"三島 徹也",schedule:"秋学期 木5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"論文指導（基礎）",code:"97081",credits:2,class_:"07",teacher:"古田 美保",schedule:"秋学期 木5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"１年次",name:"監査法人インターンシップ",code:"97082",credits:2,class_:"",teacher:"中村 繁隆",schedule:"夏季集中 他",group:"app",system:"au",exempt:false,required:false},
+  {year:"１年次",name:"企業インターンシップ",code:"97083",credits:2,class_:"",teacher:"中村 繁隆",schedule:"夏季集中 他",group:"app",system:"ec",exempt:false,required:false},
+  // 応用・実践科目群（2年次）
+  {year:"２年次",name:"実践会計プログラム演習",code:"97084",credits:2,class_:"",teacher:"小林 依子",schedule:"秋学期 水2",group:"app",system:"fa",exempt:false,required:false},
+  {year:"２年次",name:"IFRS事例研究",code:"97085",credits:2,class_:"",teacher:"東 拓也",schedule:"春学期 月4",group:"app",system:"fa",exempt:false,required:false},
+  {year:"２年次",name:"ディスクロージャー実務",code:"97086",credits:2,class_:"",teacher:"小林 依子",schedule:"秋学期 水3",group:"app",system:"fa",exempt:false,required:false},
+  {year:"２年次",name:"国際管理会計事例研究",code:"97087",credits:2,class_:"",teacher:"佐久間 智広",schedule:"春学期 月2",group:"app",system:"ma",exempt:false,required:false},
+  {year:"２年次",name:"実践監査プログラム演習",code:"97088",credits:2,class_:"",teacher:"弓塲 啓司",schedule:"秋学期（隔週・クォーター） 金3/金4",group:"app",system:"au",exempt:false,required:false},
+  {year:"２年次",name:"企業法判例演習",code:"97089",credits:2,class_:"",teacher:"岸本 達司",schedule:"秋学期 月2",group:"app",system:"la",exempt:false,required:false},
+  {year:"２年次",name:"税務事例研究",code:"97090",credits:2,class_:"",teacher:"松浦 総一",schedule:"春学期 金1",group:"app",system:"la",exempt:false,required:false},
+  {year:"２年次",name:"企業実践コミュニケーション",code:"97091",credits:2,class_:"",teacher:"古橋 孝志",schedule:"春学期 火2",group:"app",system:"ec",exempt:false,required:false},
+  {year:"２年次",name:"プロフェッショナル・ソリューション",code:"97092",credits:2,class_:"01",teacher:"坂口 順也",schedule:"通年（隔週） 月5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"プロフェッショナル・ソリューション",code:"97093",credits:2,class_:"03",teacher:"三島 徹也",schedule:"通年（隔週） 月5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"プロフェッショナル・ソリューション",code:"97094",credits:2,class_:"04",teacher:"松本 祥尚",schedule:"通年（隔週） 月5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"論文指導（実践）",code:"97095",credits:4,class_:"02",teacher:"坂口 順也",schedule:"通年 水1",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"論文指導（実践）",code:"97096",credits:4,class_:"03",teacher:"中村 繁隆",schedule:"通年 木5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"論文指導（実践）",code:"97097",credits:4,class_:"04",teacher:"松本 祥尚",schedule:"通年 水1",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"論文指導（実践）",code:"97098",credits:4,class_:"05",teacher:"富田 知嗣",schedule:"通年 水1",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"論文指導（実践）",code:"97099",credits:4,class_:"06",teacher:"三島 徹也",schedule:"通年 水1",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"論文指導（実践）",code:"97100",credits:4,class_:"07",teacher:"中村 繁隆",schedule:"通年 金5",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"論文指導（実践）",code:"97101",credits:4,class_:"08",teacher:"古田 美保",schedule:"通年 水1",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"修士論文",code:"97102",credits:4,class_:"02",teacher:"坂口 順也",schedule:"通年 他",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"修士論文",code:"97103",credits:4,class_:"03",teacher:"中村 繁隆",schedule:"通年 他",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"修士論文",code:"97104",credits:4,class_:"04",teacher:"松本 祥尚",schedule:"通年 他",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"修士論文",code:"97105",credits:4,class_:"05",teacher:"富田 知嗣",schedule:"通年 他",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"修士論文",code:"97106",credits:4,class_:"06",teacher:"三島 徹也",schedule:"通年 他",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"修士論文",code:"97107",credits:4,class_:"07",teacher:"中村 繁隆",schedule:"通年 他",group:"app",system:"ot",exempt:false,required:false},
+  {year:"２年次",name:"修士論文",code:"97108",credits:4,class_:"08",teacher:"古田 美保",schedule:"通年 他",group:"app",system:"ot",exempt:false,required:false}
+];
+
+// ============================================================
+// STATE & STORAGE
+// ============================================================
+var st={sf:'all',yf:'all',gf:'all',cf:false,q:''};
+var ttSem='sp';
+
+function GS(){try{return JSON.parse(localStorage.getItem('ksu2025')||'{}')}catch(e){return{}}}
+function SS(d){localStorage.setItem('ksu2025',JSON.stringify(d))}
+function GD(c){var s=GS();return s[c]||{done:false,rat:0,dif:0,cmt:[]}}
+function SD(c,d){var s=GS();s[c]=d;SS(s)}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function ST(sch){
+  if(sch.indexOf('春')>=0&&sch.indexOf('秋')<0)return'sp';
+  if(sch.indexOf('秋')>=0&&sch.indexOf('春')<0)return'au';
+  if(sch.indexOf('通年')>=0||sch.indexOf('冬')>=0||sch.indexOf('夏')>=0)return'yr';
+  return'ot';
+}
+function SL(t){return{sp:'春学期',au:'秋学期',yr:'通年等',ot:'その他'}[t]||'その他'}
+function BC(t){return{sp:'bsp',au:'bau',yr:'byr',ot:'bot'}[t]||'bot'}
+function GN(g){return{int:'導入',bas:'基本',dev:'発展',app:'応用・実践'}[g]||g}
+function GC(g){return{int:'bg-int',bas:'bg-bas',dev:'bg-dev',app:'bg-app'}[g]||''}
+function SN(s){return{fa:'財務会計',ma:'管理会計',au:'監査',la:'法律・税務',ec:'経営・経済',ot:'横断・演習'}[s]||s}
+function SC(s){return{fa:'bs-fa',ma:'bs-ma',au:'bs-au',la:'bs-la',ec:'bs-ec',ot:'bs-ot'}[s]||''}
+function EH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function clamp(v,mx){return Math.min(v/mx*100,100)}
+
+// ============================================================
+// FILTERS
+// ============================================================
+function SF(v){
+  st.sf=v;
+  document.querySelectorAll('[data-sf]').forEach(function(b){
+    var on=b.dataset.sf===v;b.classList.toggle('on',on);
+    if(on){b.classList.toggle('sp',v==='sp');b.classList.toggle('au',v==='au')}
+    else{b.classList.remove('sp','au')}
+  });RC();
+}
+function YF(v){st.yf=v;document.querySelectorAll('[data-yf]').forEach(function(b){b.classList.toggle('on',b.dataset.yf===v)});RC()}
+function GF(v){st.gf=v;document.querySelectorAll('[data-gf]').forEach(function(b){b.classList.toggle('on',b.dataset.gf===v)});RC()}
+function CF(){st.cf=!st.cf;document.querySelector('[data-cf]').classList.toggle('on',st.cf);RC()}
+
+// ============================================================
+// RENDER CARD
+// ============================================================
+function BC2(s){
+  var t=ST(s.schedule);
+  var sd=GD(s.code);
+  var yc=s.year==='１年次'?'by1':'by2';
+  var rStr='',dStr='';
+  if(sd.rat>0)for(var i=1;i<=5;i++)rStr+=(i<=sd.rat?'<span style="color:#f1c40f;font-size:.73rem;">★</span>':'<span style="color:#bdc3c7;font-size:.73rem;">☆</span>');
+  if(sd.dif>0){var dl=['','易','普通','やや難','難','激難'];dStr='<span style="background:#fde8e7;color:#c0392b;font-size:.67rem;border-radius:6px;padding:1px 5px;margin-left:4px;">'+dl[sd.dif]+'</span>'}
+  var cCnt=sd.cmt&&sd.cmt.length?'<span style="font-size:.68rem;color:var(--muted);margin-left:4px;">💬'+sd.cmt.length+'件</span>':'';
+  var cmtHTML=sd.cmt&&sd.cmt.length?sd.cmt.map(function(c,i){
+    return '<div class="citm"><div class="cmta"><span>'+EH(c.dt||'')+'</span><button class="cdel" onclick="DC(\''+s.code+'\','+i+')">✕</button></div><div>'+EH(c.tx)+'</div></div>'
+  }).join(''):'<div class="ecmnt">口コミがまだありません</div>';
+
+  var exemptBdg=s.exempt?'<span class="bdg bex">⚖️免除対象</span>':'';
+  var reqBdg=s.required?'<span class="bdg breq">必修</span>':'';
+
+  return '<div class="crd'+(sd.done?' done':'')+'" id="C'+s.code+'">'+
+    '<div class="chdr" onclick="XP(\''+s.code+'\')">'+
+    '<div class="chk" onclick="event.stopPropagation()"><input type="checkbox" id="K'+s.code+'"'+(sd.done?' checked':'')+' onchange="TC(\''+s.code+'\')"></div>'+
+    '<div class="cmain">'+
+    '<div class="ctrow">'+
+      '<span class="cname">'+EH(s.name)+'</span>'+
+      '<span class="ccode">'+s.code+'</span>'+
+      reqBdg+exemptBdg+
+      (sd.done?'<span class="bdone">✓ 履修済</span>':'')+
+      '<span class="bcred">'+s.credits+'単位</span>'+
+    '</div>'+
+    '<div class="cmeta">'+
+      '<span class="mitem"><span class="bdg '+BC(t)+'">'+SL(t)+'</span></span>'+
+      '<span class="mitem"><span class="bdg '+yc+'">'+s.year+'</span></span>'+
+      '<span class="mitem"><span class="bdg '+GC(s.group)+'">'+GN(s.group)+'</span></span>'+
+      '<span class="mitem"><span class="bdg '+SC(s.system)+'">'+SN(s.system)+'</span></span>'+
+      (s.class_?'<span class="mitem">🏫 組'+EH(s.class_)+'</span>':'')+
+      '<span class="mitem">👤 '+EH(s.teacher)+'</span>'+
+      '<span class="mitem">🕐 '+EH(s.schedule)+'</span>'+
+    '</div>'+
+    '<div style="margin-top:3px;display:flex;align-items:center;">'+rStr+dStr+cCnt+'</div>'+
+    '</div>'+
+    '<div style="color:#bdc3c7;font-size:.75rem;padding-top:4px;">▼</div>'+
+    '</div>'+
+    '<div class="xpnd" id="X'+s.code+'">'+
+    '<div class="rvttl">📝 評価・口コミ</div>'+
+    '<div class="rrow"><span class="rlbl">おすすめ度</span>'+
+    '<div class="sins" id="R'+s.code+'" data-tp="rat" data-cd="'+s.code+'" data-v="'+(sd.rat||0)+'">'+
+    '<span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span></div>'+
+    '<span id="RL'+s.code+'" style="font-size:.72rem;color:var(--muted);margin-left:6px;">'+(sd.rat?sd.rat+'/5':'未評価')+'</span></div>'+
+    '<div class="rrow"><span class="rlbl">難易度</span>'+
+    '<div class="sins" id="F'+s.code+'" data-tp="dif" data-cd="'+s.code+'" data-v="'+(sd.dif||0)+'">'+
+    '<span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span></div>'+
+    '<span id="FL'+s.code+'" style="font-size:.72rem;color:var(--muted);margin-left:6px;">'+(sd.dif?['','易','普通','やや難','難','激難'][sd.dif]:'未評価')+'</span></div>'+
+    '<div style="font-size:.76rem;font-weight:700;color:var(--text);margin-bottom:6px;">💬 口コミ・コメント</div>'+
+    '<div class="clist" id="CM'+s.code+'">'+cmtHTML+'</div>'+
+    '<div class="cform">'+
+    '<textarea class="cinp" id="CI'+s.code+'" placeholder="感想・アドバイスを書いてください..."></textarea>'+
+    '<button class="bsub" onclick="AC(\''+s.code+'\')">投稿する</button>'+
+    '</div></div></div>';
+}
+
+// ============================================================
+// RENDER CARD LIST
+// ============================================================
+function RC(){
+  var sl=document.getElementById('sl');
+  var srt=document.getElementById('ss').value;
+  var q=st.q.toLowerCase();
+  var data=D.filter(function(s){
+    var t=ST(s.schedule);
+    if(st.sf!=='all'&&t!==st.sf)return false;
+    if(st.yf==='1'&&s.year!=='１年次')return false;
+    if(st.yf==='2'&&s.year!=='２年次')return false;
+    if(st.gf!=='all'&&s.group!==st.gf)return false;
+    if(st.cf&&!GD(s.code).done)return false;
+    if(q&&s.name.toLowerCase().indexOf(q)<0&&s.teacher.toLowerCase().indexOf(q)<0&&s.code.indexOf(q)<0)return false;
+    return true;
+  });
+  if(srt==='name')data.sort(function(a,b){return a.name.localeCompare(b.name,'ja')});
+  else if(srt==='cred')data.sort(function(a,b){return b.credits-a.credits});
+  else if(srt==='rate')data.sort(function(a,b){return(GD(b.code).rat||0)-(GD(a.code).rat||0)});
+  else if(srt==='group'){
+    var go={int:0,bas:1,dev:2,app:3};
+    data.sort(function(a,b){return(go[a.group]||0)-(go[b.group]||0)||a.code.localeCompare(b.code)});
+  }
+  else data.sort(function(a,b){return a.code.localeCompare(b.code)});
+  if(!data.length){sl.innerHTML='<div class="nores">🔍 条件に合う科目が見つかりませんでした</div>';return}
+  sl.innerHTML=data.map(function(s){return BC2(s)}).join('');
+  UPD();
+}
+
+// ============================================================
+// EXPAND / STARS
+// ============================================================
+function IS(code){
+  ['R','F'].forEach(function(pfx){
+    var wrap=document.getElementById(pfx+code);if(!wrap)return;
+    var tp=wrap.dataset.tp;var stars=wrap.querySelectorAll('span');var sd=GD(code);
+    var cur=tp==='rat'?sd.rat||0:sd.dif||0;UDS(wrap,cur,tp);
+    stars.forEach(function(s,i){
+      s.onmouseover=function(){UDS(wrap,i+1,tp,true)};
+      s.onmouseout=function(){var d2=GD(code);UDS(wrap,tp==='rat'?(d2.rat||0):(d2.dif||0),tp)};
+      s.onclick=function(){
+        var d2=GD(code);d2[tp]=i+1;SD(code,d2);UDS(wrap,i+1,tp);
+        var lbl=document.getElementById((tp==='rat'?'RL':'FL')+code);
+        if(lbl){if(tp==='rat')lbl.textContent=(i+1)+'/5';else lbl.textContent=['','易','普通','やや難','難','激難'][i+1]}
+        RC();
+      };
+    });
+  });
+}
+function UDS(wrap,val,tp){
+  var ac=tp==='dif'?'#e74c3c':'#f1c40f';
+  wrap.querySelectorAll('span').forEach(function(s,i){s.textContent=i<val?'★':'☆';s.style.color=i<val?ac:'#bdc3c7'});
+}
+function XP(code){
+  var el=document.getElementById('X'+code);if(!el)return;
+  var was=el.classList.contains('open');el.classList.toggle('open');
+  if(!was)IS(code);
+}
+function TC(code){
+  var d=GD(code);d.done=!d.done;SD(code,d);
+  var card=document.getElementById('C'+code);
+  if(card)card.classList.toggle('done',d.done);
+  UPD();if(st.cf)RC();
+}
+function AC(code){
+  var inp=document.getElementById('CI'+code);if(!inp||!inp.value.trim())return;
+  var d=GD(code);if(!d.cmt)d.cmt=[];
+  var now=new Date();
+  var dt=now.getFullYear()+'/'+(now.getMonth()+1<10?'0':'')+(now.getMonth()+1)+'/'+(now.getDate()<10?'0':'')+now.getDate();
+  d.cmt.unshift({tx:inp.value.trim(),dt:dt});SD(code,d);inp.value='';
+  var cl=document.getElementById('CM'+code);
+  if(cl)cl.innerHTML=d.cmt.map(function(c,i){return '<div class="citm"><div class="cmta"><span>'+EH(c.dt)+'</span><button class="cdel" onclick="DC(\''+code+'\','+i+')">✕</button></div><div>'+EH(c.tx)+'</div></div>'}).join('');
+}
+function DC(code,idx){
+  if(!confirm('このコメントを削除しますか？'))return;
+  var d=GD(code);d.cmt.splice(idx,1);SD(code,d);
+  var cl=document.getElementById('CM'+code);
+  if(cl)cl.innerHTML=d.cmt.length?d.cmt.map(function(c,i){return '<div class="citm"><div class="cmta"><span>'+EH(c.dt)+'</span><button class="cdel" onclick="DC(\''+code+'\','+i+')">✕</button></div><div>'+EH(c.tx)+'</div></div>'}).join(''):'<div class="ecmnt">口コミがまだありません</div>';
+}
+
+// ============================================================
+// UPDATE STATS & REQUIREMENTS
+// ============================================================
+function UPD(){
+  var bas=0,dev=0,app=0,tot=0;
+  var exFa=0,exMa=0,exAu=0;
+  var sysMap={fa:0,ma:0,au:0,la:0,ec:0,ot:0};
+  var doneCnt=0;
+
+  // 同名科目（同じ科目名）は1つだけ卒業単位に算入（クラス違い重複対策）
+  var doneNames={bas:{},dev:{},app:{}};
+
+  D.forEach(function(s){
+    var sd=GD(s.code);
+    if(!sd.done)return;
+    doneCnt++;
+    sysMap[s.system]=(sysMap[s.system]||0)+s.credits;
+    // 卒業単位算入（導入は除外）
+    if(s.group==='int')return;
+    // 同名重複チェック
+    if(s.group==='bas'){if(!doneNames.bas[s.name]){bas+=s.credits;doneNames.bas[s.name]=1}}
+    else if(s.group==='dev'){if(!doneNames.dev[s.name]){dev+=s.credits;doneNames.dev[s.name]=1}}
+    else if(s.group==='app'){if(!doneNames.app[s.name]){app+=s.credits;doneNames.app[s.name]=1}}
+    // 短答免除対象
+    if(s.exempt){
+      if(s.system==='fa')exFa+=s.credits;
+      else if(s.system==='ma')exMa+=s.credits;
+      else if(s.system==='au')exAu+=s.credits;
+    }
+    tot+=s.credits;
+  });
+  // 重複除去合計（最大上限考慮）
+  var basC=Math.min(bas,16),devC=Math.min(dev,16),appC=Math.min(app,12);
+  var gradTot=bas+dev+app; // 実取得（上限なし表示用）
+  var need48=Math.max(0,48-gradTot);
+
+  // ステータスバー更新
+  var totalAll=D.reduce(function(a,s){return a+s.credits},0);
+  document.getElementById('tc').textContent=totalAll;
+  document.getElementById('cc').textContent=gradTot;
+  document.getElementById('rc').textContent=Math.max(0,48-gradTot);
+  document.getElementById('cn').textContent=doneCnt;
+  var pct=Math.min(Math.round(gradTot/48*100),100);
+  document.getElementById('pp').textContent=pct+'%';
+  document.getElementById('pf').style.width=pct+'%';
+
+  var exTot=exFa+exMa+exAu;
+  var ePct=Math.min(Math.round(exTot/28*100),100);
+  document.getElementById('ep').textContent=exTot+'/28単位';
+  document.getElementById('ef').style.width=ePct+'%';
+
+  // 要件タブ更新
+  setBar('g-bas',bas,16);
+  setBar('g-dev',dev,16);
+  setBar('g-app',app,12);
+  document.getElementById('g-tot-v').textContent=gradTot+'/48単位';
+  document.getElementById('g-tot-b').style.width=clamp(gradTot,48)+'%';
+
+  // 短答免除
+  setTsItem('ts-fa',exFa,10);
+  setTsItem('ts-ma',exMa,6);
+  setTsItem('ts-au',exAu,6);
+  var allOk=(exFa>=10&&exMa>=6&&exAu>=6&&exTot>=28);
+  document.getElementById('ts-tot').querySelector('.ts-total-val').textContent=exTot+' / 28単位以上'+(allOk?' ✅達成！':'');
+
+  // 充足チェック
+  var needList=document.getElementById('need-list');
+  var items=[];
+  items.push(mkReqRow('基本科目群（卒業）',bas,16,16));
+  items.push(mkReqRow('発展科目群（卒業）',dev,16,16));
+  items.push(mkReqRow('応用・実践科目群（卒業）',app,12,12));
+  items.push(mkReqRow('卒業合計',gradTot,48,48));
+  items.push(mkReqRow('短答免除 財務会計系',exFa,10,10));
+  items.push(mkReqRow('短答免除 管理会計系',exMa,6,6));
+  items.push(mkReqRow('短答免除 監査系',exAu,6,6));
+  items.push(mkReqRow('短答免除 合計',exTot,28,28));
+  needList.innerHTML=items.join('');
+
+  // 系統別
+  var sysList=document.getElementById('system-list');
+  var sysItems=['fa','ma','au','la','ec','ot'].map(function(k){
+    var v=sysMap[k]||0;
+    return '<div class="req-row"><span class="req-name"><span class="bdg '+SC(k)+'">'+SN(k)+'</span></span><span class="req-val">'+v+'単位</span></div>';
+  });
+  sysList.innerHTML=sysItems.join('');
+}
+
+function setBar(id,v,max){
+  document.getElementById(id+'-v').textContent=v+'/'+max+'単位';
+  document.getElementById(id+'-b').style.width=clamp(v,max)+'%';
+}
+function setTsItem(id,v,max){
+  var el=document.getElementById(id);
+  document.getElementById(id+'-v').textContent=v;
+  document.getElementById(id+'-b').style.width=clamp(v,max)+'%';
+  el.style.borderTop='3px solid '+(v>=max?'var(--spring)':'var(--border)');
+}
+function mkReqRow(name,v,min,max){
+  var cls=v>=min?'ok':v>=min*0.7?'near':'ng';
+  var rest=Math.max(0,min-v);
+  var mark=v>=min?'✅':'あと'+rest+'単位';
+  return '<div class="req-row"><span class="req-name">'+name+'</span><span class="req-val '+cls+'">'+v+'単位 '+mark+'</span></div>';
+}
+
+// ============================================================
+// TIMETABLE
+// ============================================================
+var DAYS=['月','火','水','木','金','土'];
+var PERIODS=[1,2,3,4,5];
+
+// schedule文字列から曜日×時限を抽出
+function parseSched(sch,sem){
+  var results=[];
+  // 対象学期のみ
+  var isSp=sch.indexOf('春')>=0&&sch.indexOf('秋')<0;
+  var isAu=sch.indexOf('秋')>=0&&sch.indexOf('春')<0;
+  if(sem==='sp'&&!isSp)return results;
+  if(sem==='au'&&!isAu)return results;
+  // 曜日・時限を全て抽出
+  var matches=sch.match(/[月火水木金土][1-5]/g)||[];
+  matches.forEach(function(m){
+    results.push({day:m[0],period:parseInt(m[1])});
+  });
+  return results;
+}
+
+function TTSem(sem,btn){
+  ttSem=sem;
+  document.querySelectorAll('.tt-stab').forEach(function(b){b.classList.remove('on')});
+  btn.classList.add('on');
+  renderTT();
+}
+
+function renderTT(){
+  var sem=ttSem;
+  // セルにデータを構築
+  var cells={};
+  DAYS.forEach(function(d){PERIODS.forEach(function(p){cells[d+'_'+p]=[]})});
+
+  D.forEach(function(s){
+    var slots=parseSched(s.schedule,sem);
+    slots.forEach(function(slot){
+      var key=slot.day+'_'+slot.period;
+      if(cells[key])cells[key].push(s);
+    });
+  });
+
+  var sysCls={fa:'s-fa',ma:'s-ma',au:'s-au',la:'s-la',ec:'s-ec',ot:'s-ot'};
+
+  var html='<table class="tt-table"><thead><tr><th>時限</th>';
+  DAYS.forEach(function(d){html+='<th class="day-hdr">'+d+'曜</th>'});
+  html+='</tr></thead><tbody>';
+
+  PERIODS.forEach(function(p){
+    var times=['9:00','10:40','13:00','14:40','16:20'];
+    html+='<tr><td class="day-hdr" style="font-size:.68rem;white-space:nowrap">'+p+'限<br><span style="font-weight:400;color:var(--muted)">'+times[p-1]+'</span></td>';
+    DAYS.forEach(function(d){
+      html+='<td class="tt-cell">';
+      var list=cells[d+'_'+p]||[];
+      list.forEach(function(s){
+        var sd=GD(s.code);
+        var sc=sysCls[s.system]||'s-ot';
+        html+='<div class="tt-item '+sc+(sd.done?' done-item':'')+'" onclick="switchTab(\'list\')" title="'+EH(s.name)+'">'+
+          '<div class="tt-name">'+EH(s.name.length>12?s.name.substr(0,12)+'…':s.name)+'</div>'+
+          '<div class="tt-teacher">'+EH(s.teacher)+(sd.done?' ✓':'')+'</div>'+
+          '</div>';
+      });
+      html+='</td>';
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  document.getElementById('tt-content').innerHTML=html;
+}
+
+// ============================================================
+// TAB SWITCH
+// ============================================================
+function switchTab(id){
+  document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('on')});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on')});
+  document.getElementById('tab-'+id).classList.add('on');
+  var tabs={'list':0,'req':1,'tt':2};
+  document.querySelectorAll('.tab')[tabs[id]].classList.add('on');
+  if(id==='tt')renderTT();
+  if(id==='req')UPD();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.getElementById('si').addEventListener('input',function(){st.q=this.value;RC()});
+RC();UPD();
+</script>
+</body>
+</html>
