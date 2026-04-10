@@ -910,6 +910,9 @@ function UPD(){
   // 登録済み（reg）免除単位カウント用
   var regExFa=0,regExMa=0,regExAu=0;
   var regExNames={fa:{},ma:{},au:{}};
+  // 登録済み（reg）卒業単位カウント用
+  var regBas=0,regDev=0,regApp=0;
+  var regGradNames={bas:{},dev:{},app:{}};
   // 履修済み科目リスト（一覧表示用）
   var doneList=[];
 
@@ -921,6 +924,12 @@ function UPD(){
       if(s.system==='fa'&&!regExNames.fa[s.name]){regExFa+=s.credits;regExNames.fa[s.name]=1;}
       else if(s.system==='ma'&&!regExNames.ma[s.name]){regExMa+=s.credits;regExNames.ma[s.name]=1;}
       else if(s.system==='au'&&!regExNames.au[s.name]){regExAu+=s.credits;regExNames.au[s.name]=1;}
+    }
+    // 登録済み卒業単位（done除く・導入除く・重複除く）
+    if(sd.reg&&!sd.done&&s.group!=='int'){
+      if(s.group==='bas'&&!regGradNames.bas[s.name]){regBas+=s.credits;regGradNames.bas[s.name]=1;}
+      else if(s.group==='dev'&&!regGradNames.dev[s.name]){regDev+=s.credits;regGradNames.dev[s.name]=1;}
+      else if(s.group==='app'&&!regGradNames.app[s.name]){regApp+=s.credits;regGradNames.app[s.name]=1;}
     }
     if(!sd.done)return;
     doneCnt++;
@@ -964,10 +973,15 @@ function UPD(){
   setStyle('ef','width',ePct+'%');
 
   // 要件タブ更新（要件タブが存在する場合のみ）
-  setBar('g-bas',bas,16);
-  setBar('g-dev',dev,16);
-  setBar('g-app',app,12);
-  setEl('g-tot-v',gradTot+'/48単位');
+  var regGradTot=regBas+regDev+regApp;
+  setBarWithReg('g-bas',bas,regBas,16);
+  setBarWithReg('g-dev',dev,regDev,16);
+  setBarWithReg('g-app',app,regApp,12);
+  var gTotEl=document.getElementById('g-tot-v');
+  if(gTotEl){
+    var regTotStr=regGradTot>0?' <span style="color:#1565c0;font-size:.72rem;font-weight:600">（登録含: '+(gradTot+regGradTot)+'）</span>':'';
+    gTotEl.innerHTML=gradTot+'/48単位'+regTotStr;
+  }
   setStyle('g-tot-b','width',clamp(gradTot,48)+'%');
 
   // 短答免除（登録済み合算後の数値を括弧表記で追加）
@@ -1017,6 +1031,14 @@ function UPD(){
 function setBar(id,v,max){
   var ev=document.getElementById(id+'-v');if(ev)ev.textContent=v+'/'+max+'単位';
   var eb2=document.getElementById(id+'-b');if(eb2)eb2.style.width=clamp(v,max)+'%';
+}
+function setBarWithReg(id,done,reg,max){
+  var ev=document.getElementById(id+'-v');
+  if(ev){
+    var regStr=reg>0?' <span style="color:#1565c0;font-size:.72rem;font-weight:600">（登録含: '+(done+reg)+'）</span>':'';
+    ev.innerHTML=done+'/'+max+'単位'+regStr;
+  }
+  var eb2=document.getElementById(id+'-b');if(eb2)eb2.style.width=clamp(done,max)+'%';
 }
 function setTsItem(id,v,max){
   var el=document.getElementById(id);
