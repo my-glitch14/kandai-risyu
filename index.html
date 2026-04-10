@@ -159,6 +159,13 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .quick-done.undone:hover{background:#dce8ff;border-color:var(--primary)}
 .quick-done.qdone{background:#d5f5e3;color:#1a7c3e;border:1.5px solid #a8e6c0}
 .quick-done.qdone:hover{background:#f8e7e7;color:var(--autumn);border-color:#f5aaaa}
+.quick-reg{display:inline-flex;align-items:center;gap:5px;border:none;border-radius:20px;padding:5px 14px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
+.quick-reg.unreg{background:#fff8e1;color:#f57f17;border:1.5px solid #ffe082}
+.quick-reg.unreg:hover{background:#fff3cd;border-color:#ffc107}
+.quick-reg.reged{background:#e3f2fd;color:#1565c0;border:1.5px solid #90caf9}
+.quick-reg.reged:hover{background:#fce4ec;color:#c62828;border-color:#ef9a9a}
+/* 登録済みバッジ */
+.breg{background:#e3f2fd;color:#1565c0;font-size:.65rem;border-radius:8px;padding:1px 6px;font-weight:700}
 
 /* ===== 時間割ビュー ===== */
 .tt-wrap{padding:12px 16px;overflow-x:auto}
@@ -170,6 +177,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .tt-item{background:#e3f2fd;border-radius:6px;padding:3px 5px;margin:2px 0;cursor:default;border-left:3px solid var(--c-fa);font-size:.68rem;line-height:1.3;text-align:left;position:relative}
 .tt-item:hover{opacity:.85}
 .tt-item.done-item::after{content:'✓';position:absolute;top:2px;right:4px;font-size:.7rem;color:var(--spring);font-weight:900}
+.tt-item.reg-item{border-left-width:4px;border-style:dashed}
 .tt-item.not-mine{opacity:.35;filter:grayscale(.4)}
 .tt-name{font-weight:700;color:#1a237e}
 .tt-teacher{color:var(--muted);font-size:.63rem}
@@ -225,7 +233,8 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
   <div class="sbar-section">
     <div class="stat-item"><div class="snum g" id="cc">0</div><div class="slbl">履修済み単位</div></div>
     <div class="stat-item"><div class="snum o" id="rc">0</div><div class="slbl">残り単位</div></div>
-    <div class="stat-item"><div class="snum" id="cn">0</div><div class="slbl">履修科目数</div></div>
+    <div class="stat-item"><div class="snum" id="cn">0</div><div class="slbl">履修済科目数</div></div>
+    <div class="stat-item"><div class="snum" style="color:var(--c-fa)" id="rn">0</div><div class="slbl">履修登録数</div></div>
   </div>
   <div class="sbar-section">
     <div class="prog-wrap">
@@ -540,7 +549,7 @@ var ttView='mine';
 
 function GS(){try{return JSON.parse(localStorage.getItem('ksu2025')||'{}')}catch(e){return{}}}
 function SS(d){localStorage.setItem('ksu2025',JSON.stringify(d))}
-function GD(c){var s=GS();return s[c]||{done:false,rat:0,dif:0,cmt:[]}}
+function GD(c){var s=GS();return s[c]||{done:false,reg:false,rat:0,dif:0,cmt:[]}}
 function SD(c,d){var s=GS();s[c]=d;SS(s)}
 
 // ============================================================
@@ -595,6 +604,7 @@ function BC2(s){
   var reqBdg=s.required?'<span class="bdg breq">必修</span>':'';
 
   var qdoneBtn='<button class="quick-done '+(sd.done?'qdone':'undone')+'" onclick="event.stopPropagation();QD(\''+s.code+'\')" id="QD'+s.code+'">'+(sd.done?'✅ 履修済み（取消）':'☑ 履修済みにする')+'</button>';
+  var qregBtn='<button class="quick-reg '+(sd.reg?'reged':'unreg')+'" onclick="event.stopPropagation();QR(\''+s.code+'\')" id="QR'+s.code+'">'+(sd.reg?'📋 登録済み（取消）':'📝 履修登録する')+'</button>';
   return '<div class="crd'+(sd.done?' done':'')+'" id="C'+s.code+'">'+
     '<div class="chdr" onclick="XP(\''+s.code+'\')">'+
     '<div class="cmain">'+
@@ -602,6 +612,7 @@ function BC2(s){
       '<span class="cname">'+EH(s.name)+'</span>'+
       '<span class="ccode">'+s.code+'</span>'+
       reqBdg+exemptBdg+
+      (sd.reg?'<span class="bdg breg breg-badge">📋登録済</span>':'')+
       '<span class="bcred">'+s.credits+'単位</span>'+
     '</div>'+
     '<div class="cmeta">'+
@@ -613,7 +624,7 @@ function BC2(s){
       '<span class="mitem">👤 '+EH(s.teacher)+'</span>'+
       '<span class="mitem">🕐 '+EH(s.schedule)+'</span>'+
     '</div>'+
-    '<div style="margin-top:5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+qdoneBtn+(rStr?'<span style="display:flex;align-items:center;gap:1px">'+rStr+'</span>':'')+(dStr||'')+(cCnt||'')+'</div>'+
+    '<div style="margin-top:5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'+qdoneBtn+qregBtn+(rStr?'<span style="display:flex;align-items:center;gap:1px;margin-left:2px">'+rStr+'</span>':'')+(dStr||'')+(cCnt||'')+'</div>'+
     '</div>'+
     '<div style="color:#bdc3c7;font-size:.75rem;padding-top:4px;flex-shrink:0">▼</div>'+
     '</div>'+
@@ -697,7 +708,6 @@ function XP(code){
 }
 function QD(code){
   var d=GD(code);d.done=!d.done;SD(code,d);
-  // カード全体を更新
   var card=document.getElementById('C'+code);
   if(card){
     card.classList.toggle('done',d.done);
@@ -707,7 +717,37 @@ function QD(code){
       btn.className='quick-done '+(d.done?'qdone':'undone');
     }
   }
-  UPD();if(st.cf)RC();
+  UPD();
+  // 要件タブが表示中ならUPD済み、時間割が表示中なら再描画
+  var ttPane=document.getElementById('tab-tt');
+  if(ttPane&&ttPane.classList.contains('on'))renderTT();
+  if(st.cf)RC();
+}
+function QR(code){
+  var d=GD(code);d.reg=!d.reg;SD(code,d);
+  var btn=document.getElementById('QR'+code);
+  if(btn){
+    btn.textContent=d.reg?'📋 登録済み（取消）':'📝 履修登録する';
+    btn.className='quick-reg '+(d.reg?'reged':'unreg');
+  }
+  // バッジ更新
+  var card=document.getElementById('C'+code);
+  if(card){
+    var existing=card.querySelector('.breg-badge');
+    if(d.reg&&!existing){
+      var ctrow=card.querySelector('.ctrow');
+      if(ctrow){
+        var bdg=document.createElement('span');
+        bdg.className='bdg breg breg-badge';bdg.textContent='📋登録済';
+        ctrow.appendChild(bdg);
+      }
+    } else if(!d.reg&&existing){
+      existing.remove();
+    }
+  }
+  UPD();
+  var ttPane=document.getElementById('tab-tt');
+  if(ttPane&&ttPane.classList.contains('on'))renderTT();
 }
 function TC(code){
   var d=GD(code);d.done=!d.done;SD(code,d);
@@ -738,13 +778,15 @@ function UPD(){
   var bas=0,dev=0,app=0,tot=0;
   var exFa=0,exMa=0,exAu=0;
   var sysMap={fa:0,ma:0,au:0,la:0,ec:0,ot:0};
-  var doneCnt=0;
+  var doneCnt=0,regCnt=0;
 
   // 同名科目（同じ科目名）は1つだけ卒業単位に算入（クラス違い重複対策）
   var doneNames={bas:{},dev:{},app:{}};
+  var regNames={};
 
   D.forEach(function(s){
     var sd=GD(s.code);
+    if(sd.reg&&!regNames[s.name]){regCnt++;regNames[s.name]=1;}
     if(!sd.done)return;
     doneCnt++;
     sysMap[s.system]=(sysMap[s.system]||0)+s.credits;
@@ -775,6 +817,7 @@ function UPD(){
   setEl('cc',gradTot);
   setEl('rc',Math.max(0,48-gradTot));
   setEl('cn',doneCnt);
+  setEl('rn',regCnt);
   var pct=Math.min(Math.round(gradTot/48*100),100);
   setEl('pp',pct+'%');
   setStyle('pf','width',pct+'%');
@@ -887,7 +930,8 @@ function renderTT(){
   DAYS.forEach(function(d){PERIODS.forEach(function(p){cells[d+'_'+p]=[]})});
   D.forEach(function(s){
     var sd=GD(s.code);
-    if(isMine&&!sd.done)return;
+    // 自分モード：履修済み or 履修登録済みのみ表示
+    if(isMine&&!sd.done&&!sd.reg)return;
     var slots=parseSched(s.schedule,sem);
     slots.forEach(function(slot){var key=slot.day+'_'+slot.period;if(cells[key])cells[key].push(s);});
   });
@@ -912,11 +956,13 @@ function renderTT(){
       list.forEach(function(s){
         var sd=GD(s.code);
         var sc=sysCls[s.system]||'s-ot';
-        var notMine=(!isMine&&!sd.done)?' not-mine':'';
+        var notMine=(!isMine&&!sd.done&&!sd.reg)?' not-mine':'';
         var doneCls=sd.done?' done-item':'';
+        var regCls=(!sd.done&&sd.reg)?' reg-item':'';
         var shortName=s.name.length>13?s.name.substr(0,13)+'…':s.name;
-        html+='<div class="tt-item '+sc+doneCls+notMine+'" title="'+EH(s.name)+' / '+EH(s.teacher)+'">'+
-          '<div class="tt-name">'+EH(shortName)+'</div>'+
+        var regMark=sd.reg&&!sd.done?' <span style="color:#1565c0;font-size:.6rem;font-weight:900">📋</span>':'';
+        html+='<div class="tt-item '+sc+doneCls+regCls+notMine+'" title="'+EH(s.name)+' / '+EH(s.teacher)+(sd.done?' ✓履修済':sd.reg?' 📋登録済':'')+'">'+
+          '<div class="tt-name">'+EH(shortName)+regMark+'</div>'+
           '<div class="tt-teacher">'+EH(s.teacher.split('　')[0])+'</div>'+
           '</div>';
       });
