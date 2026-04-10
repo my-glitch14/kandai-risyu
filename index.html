@@ -203,6 +203,15 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .tt-view-stab.mine.on{background:var(--spring);color:#fff;border-color:var(--spring)}
 .tt-view-stab.all.on{background:#e65100;color:#fff;border-color:#e65100}
 
+.done-table{width:100%;border-collapse:collapse;font-size:.76rem}
+.done-table th{background:#eef2ff;color:var(--primary);font-weight:700;padding:5px 8px;text-align:left;font-size:.7rem;border-bottom:2px solid var(--border)}
+.done-table td{padding:5px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+.done-table tr:last-child td{border-bottom:none}
+.done-table tr:hover td{background:#f8f9ff}
+.done-empty{text-align:center;padding:24px;color:var(--muted);font-size:.82rem}
+/* 短答免除 括弧表記 */
+.ts-reg{display:block;font-size:.72rem;color:#1565c0;font-weight:600;margin-top:2px}
+
 @media(max-width:600px){
   .sbar{padding:8px 12px;gap:8px}
   .req-grid{grid-template-columns:1fr}
@@ -363,6 +372,25 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
         <div class="req-ttl">📊 系統別履修状況</div>
         <div id="system-list"></div>
       </div>
+    </div>
+
+    <!-- 履修済み科目一覧 -->
+    <div class="req-card" style="margin-bottom:12px">
+      <div class="req-ttl" style="justify-content:space-between;align-items:center">
+        <span>✅ 履修済み科目一覧</span>
+        <span style="font-size:.72rem;font-weight:400;color:var(--muted)" id="done-list-count"></span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="fbtn on" data-dlf="all" onclick="DLF('all')" style="font-size:.72rem;padding:3px 10px">全て</button>
+        <button class="fbtn" data-dlf="bas" onclick="DLF('bas')" style="font-size:.72rem;padding:3px 10px">基本</button>
+        <button class="fbtn" data-dlf="dev" onclick="DLF('dev')" style="font-size:.72rem;padding:3px 10px">発展</button>
+        <button class="fbtn" data-dlf="app" onclick="DLF('app')" style="font-size:.72rem;padding:3px 10px">応用</button>
+        <button class="fbtn" data-dlf="fa"  onclick="DLF('fa')"  style="font-size:.72rem;padding:3px 10px">財務</button>
+        <button class="fbtn" data-dlf="ma"  onclick="DLF('ma')"  style="font-size:.72rem;padding:3px 10px">管理</button>
+        <button class="fbtn" data-dlf="au"  onclick="DLF('au')"  style="font-size:.72rem;padding:3px 10px">監査</button>
+        <button class="fbtn" data-dlf="la"  onclick="DLF('la')"  style="font-size:.72rem;padding:3px 10px">法律</button>
+      </div>
+      <div id="done-list"></div>
     </div>
 
   </div>
@@ -879,11 +907,24 @@ function UPD(){
   var doneNames={bas:{},dev:{},app:{}};
   var regNames={};
 
+  // 登録済み（reg）免除単位カウント用
+  var regExFa=0,regExMa=0,regExAu=0;
+  var regExNames={fa:{},ma:{},au:{}};
+  // 履修済み科目リスト（一覧表示用）
+  var doneList=[];
+
   D.forEach(function(s){
     var sd=GD(s.code);
     if(sd.reg&&!regNames[s.name]){regCnt++;regNames[s.name]=1;}
+    // 登録済み免除単位（done除く、重複除く）
+    if(sd.reg&&!sd.done&&s.exempt&&s.group!=='int'){
+      if(s.system==='fa'&&!regExNames.fa[s.name]){regExFa+=s.credits;regExNames.fa[s.name]=1;}
+      else if(s.system==='ma'&&!regExNames.ma[s.name]){regExMa+=s.credits;regExNames.ma[s.name]=1;}
+      else if(s.system==='au'&&!regExNames.au[s.name]){regExAu+=s.credits;regExNames.au[s.name]=1;}
+    }
     if(!sd.done)return;
     doneCnt++;
+    doneList.push(s);
     sysMap[s.system]=(sysMap[s.system]||0)+s.credits;
     // 卒業単位算入（導入は除外）
     if(s.group==='int')return;
@@ -929,13 +970,22 @@ function UPD(){
   setEl('g-tot-v',gradTot+'/48単位');
   setStyle('g-tot-b','width',clamp(gradTot,48)+'%');
 
-  // 短答免除
-  setTsItem('ts-fa',exFa,10);
-  setTsItem('ts-ma',exMa,6);
-  setTsItem('ts-au',exAu,6);
+  // 短答免除（登録済み合算後の数値を括弧表記で追加）
+  setTsItemWithReg('ts-fa',exFa,regExFa,10);
+  setTsItemWithReg('ts-ma',exMa,regExMa,6);
+  setTsItemWithReg('ts-au',exAu,regExAu,6);
+  var exTotReg=exTot+(regExFa+regExMa+regExAu);
   var allOk=(exFa>=10&&exMa>=6&&exAu>=6&&exTot>=28);
+  var allOkReg=(exFa+regExFa>=10&&exMa+regExMa>=6&&exAu+regExAu>=6&&exTotReg>=28);
   var tsTot=document.getElementById('ts-tot');
-  if(tsTot){var tv=tsTot.querySelector('.ts-total-val');if(tv)tv.textContent=exTot+' / 28単位以上'+(allOk?' ✅達成！':'');}
+  if(tsTot){
+    var tv=tsTot.querySelector('.ts-total-val');
+    if(tv){
+      var regExtra=regExFa+regExMa+regExAu;
+      var regStr=regExtra>0?' <span class="ts-reg">（登録済含: '+exTotReg+'単位'+(allOkReg?' ✅':'')+'）</span>':'';
+      tv.innerHTML=exTot+' / 28単位以上'+(allOk?' ✅達成！':'')+regStr;
+    }
+  }
 
   // 充足チェック
   var needList=document.getElementById('need-list');
@@ -961,6 +1011,10 @@ function UPD(){
     });
     sysList.innerHTML=sysItems.join('');
   }
+
+  // 履修済み科目一覧
+  window._doneList=doneList; // フィルター用にグローバル保持
+  renderDoneList(doneList, window._dlf||'all');
 }
 
 function setBar(id,v,max){
@@ -978,6 +1032,68 @@ function mkReqRow(name,v,min,max){
   var rest=Math.max(0,min-v);
   var mark=v>=min?'✅':'あと'+rest+'単位';
   return '<div class="req-row"><span class="req-name">'+name+'</span><span class="req-val '+cls+'">'+v+'単位 '+mark+'</span></div>';
+}
+
+// 短答免除ボックス: 履修済み数値 + 括弧（登録済含）
+function setTsItemWithReg(id,done,reg,max){
+  var el=document.getElementById(id);
+  var ev=document.getElementById(id+'-v');
+  var eb=document.getElementById(id+'-b');
+  var total=done+reg;
+  if(ev){
+    // done数値 + 括弧（登録含む合計）
+    var regSpan=reg>0?'<span class="ts-reg">（登録含: '+total+'）</span>':'';
+    ev.innerHTML=done+regSpan;
+  }
+  if(eb)eb.style.width=clamp(done,max)+'%';
+  if(el)el.style.borderTop='3px solid '+(done>=max?'var(--spring)':total>=max?'#1976d2':'var(--border)');
+}
+
+// 履修済み科目一覧フィルター
+var _dlf='all';
+function DLF(v){
+  _dlf=v;window._dlf=v;
+  document.querySelectorAll('[data-dlf]').forEach(function(b){b.classList.toggle('on',b.dataset.dlf===v)});
+  renderDoneList(window._doneList||[],v);
+}
+
+function renderDoneList(list,filter){
+  var dl=document.getElementById('done-list');
+  var cnt=document.getElementById('done-list-count');
+  if(!dl)return;
+  // フィルタリング
+  var filtered=list.filter(function(s){
+    if(filter==='all')return true;
+    if(filter==='bas'||filter==='dev'||filter==='app')return s.group===filter;
+    return s.system===filter;
+  });
+  // 件数表示
+  if(cnt)cnt.textContent=filtered.length+'科目 / '+list.length+'科目履修済み';
+  if(!filtered.length){
+    dl.innerHTML='<div class="done-empty">該当する履修済み科目がありません</div>';
+    return;
+  }
+  // 科目群順→コード順でソート
+  var go={int:0,bas:1,dev:2,app:3};
+  filtered.sort(function(a,b){return(go[a.group]||0)-(go[b.group]||0)||a.code.localeCompare(b.code)});
+  var rows=filtered.map(function(s){
+    var sc=GSC(s.code);
+    var stars='';
+    if(sc.rat>0)for(var i=1;i<=5;i++)stars+=(i<=sc.rat?'★':'☆');
+    var difLbl=sc.dif?['','易','普通','やや難','難','激難'][sc.dif]:'';
+    return '<tr>'+
+      '<td><span class="bdg '+GC(s.group)+'" style="font-size:.6rem">'+GN(s.group)+'</span></td>'+
+      '<td><span class="bdg '+SC(s.system)+'" style="font-size:.6rem">'+SN(s.system)+'</span></td>'+
+      '<td style="font-weight:600">'+EH(s.name)+'</td>'+
+      '<td style="text-align:center"><span class="bcred" style="font-size:.65rem">'+s.credits+'単位</span></td>'+
+      '<td style="color:#f1c40f;font-size:.7rem;letter-spacing:-1px">'+(stars||'<span style="color:var(--muted)">-</span>')+'</td>'+
+      '<td style="font-size:.7rem;color:#c0392b">'+(difLbl||'<span style="color:var(--muted)">-</span>')+'</td>'+
+      '<td style="font-size:.7rem;color:var(--muted)">'+(s.exempt?'<span style="color:#f57f17">⚖️</span>':'')+(s.required?'<span style="color:#880e4f">必修</span>':'')+'</td>'+
+      '</tr>';
+  }).join('');
+  dl.innerHTML='<table class="done-table"><thead><tr>'+
+    '<th>科目群</th><th>系統</th><th>科目名</th><th>単位</th><th>おすすめ</th><th>難易度</th><th>区分</th>'+
+    '</tr></thead><tbody>'+rows+'</tbody></table>';
 }
 
 // ============================================================
