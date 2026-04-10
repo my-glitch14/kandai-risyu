@@ -1173,11 +1173,14 @@ var PERIODS=[1,2,3,4,5];
 // schedule文字列から曜日×時限を抽出
 function parseSched(sch,sem){
   var results=[];
-  // 対象学期のみ
+  // 学期判定
   var isSp=sch.indexOf('春')>=0&&sch.indexOf('秋')<0;
   var isAu=sch.indexOf('秋')>=0&&sch.indexOf('春')<0;
-  if(sem==='sp'&&!isSp)return results;
-  if(sem==='au'&&!isAu)return results;
+  var isYr=!isSp&&!isAu&&sch.indexOf('通年')>=0; // 通年は春秋両方に表示
+  // 集中講義など曜日なし→早期リターン
+  if(!isSp&&!isAu&&!isYr)return results;
+  if(sem==='sp'&&!isSp&&!isYr)return results;
+  if(sem==='au'&&!isAu&&!isYr)return results;
   // 曜日・時限を全て抽出
   var matches=sch.match(/[月火水木金土][1-5]/g)||[];
   matches.forEach(function(m){
