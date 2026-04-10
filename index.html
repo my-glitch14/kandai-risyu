@@ -205,6 +205,23 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .tt-view-stab.all.on{background:#e65100;color:#fff;border-color:#e65100}
 
 .done-table{width:100%;border-collapse:collapse;font-size:.76rem}
+/* レビューカード */
+.rev-list{max-height:220px;overflow-y:auto;margin-bottom:8px;display:flex;flex-direction:column;gap:6px}
+.rev-item{background:var(--bg);border-radius:8px;padding:8px 10px;font-size:.78rem}
+.rev-meta{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.rev-num{background:#e8eaf6;color:#3949ab;border-radius:10px;padding:1px 7px;font-size:.65rem;font-weight:700}
+.rev-stars{font-size:.75rem;letter-spacing:-1px}
+.rev-dif{background:#fde8e7;color:#c0392b;font-size:.65rem;border-radius:6px;padding:1px 5px;font-weight:700}
+.rev-date{color:var(--muted);font-size:.65rem;margin-left:auto}
+.rev-txt{color:var(--text);line-height:1.5}
+.rev-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;padding:0 2px;margin-left:4px}
+.rev-del:hover{color:var(--autumn)}
+/* 入力エリア */
+.rev-input-area{background:#f8f9ff;border-radius:10px;padding:10px;border:1.5px solid var(--border)}
+.rev-input-ttl{font-size:.76rem;font-weight:700;color:var(--primary);margin-bottom:8px}
+.rev-stars-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.rev-stars-lbl{font-size:.74rem;color:var(--muted);width:70px}
+.tmp-star{font-size:1.3rem;cursor:pointer;color:#bdc3c7;transition:color .1s;user-select:none}
 .done-table th{background:#eef2ff;color:var(--primary);font-weight:700;padding:5px 8px;text-align:left;font-size:.7rem;border-bottom:2px solid var(--border)}
 .done-table td{padding:5px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
 .done-table tr:last-child td{border-bottom:none}
@@ -746,7 +763,7 @@ function BC2(s){
   if(sd.rat>0)for(var i=1;i<=5;i++)rStr+=(i<=sd.rat?'<span style="color:#f1c40f;font-size:.73rem;">★</span>':'<span style="color:#bdc3c7;font-size:.73rem;">☆</span>');
   if(sd.dif>0){var dl=['','易','普通','やや難','難','激難'];dStr='<span style="background:#fde8e7;color:#c0392b;font-size:.67rem;border-radius:6px;padding:1px 5px;margin-left:4px;">'+dl[sd.dif]+'</span>'}
   var cCnt=sd.cmt&&sd.cmt.length?'<span style="font-size:.68rem;color:var(--muted);margin-left:4px;">💬'+sd.cmt.length+'件</span>':'';
-  var cmtHTML=sd.cmt&&sd.cmt.length?renderCmts(s.code,sd.cmt):'<div class="ecmnt">口コミがまだありません</div>';
+  var cmtHTML=sd.cmt&&sd.cmt.length?renderRevs(s.code,sd.cmt):'<div class="ecmnt">まだ評価・口コミがありません</div>';
 
   var exemptBdg=s.exempt?'<span class="bdg bex">⚖️免除対象</span>':'';
   var reqBdg=s.required?'<span class="bdg breq">必修</span>':'';
@@ -778,20 +795,29 @@ function BC2(s){
     '</div>'+
     '<div class="xpnd" id="X'+s.code+'">'+
     '<div class="rvttl">📝 評価・口コミ</div>'+
-    '<div class="rrow"><span class="rlbl">おすすめ度</span>'+
-    '<div class="sins" id="R'+s.code+'" data-tp="rat" data-cd="'+s.code+'" data-v="'+(sd.rat||0)+'">'+
-    '<span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span></div>'+
-    '<span id="RL'+s.code+'" style="font-size:.72rem;color:var(--muted);margin-left:6px;">'+(sd.rat?sd.rat+'/5':'未評価')+'</span></div>'+
-    '<div class="rrow"><span class="rlbl">難易度</span>'+
-    '<div class="sins" id="F'+s.code+'" data-tp="dif" data-cd="'+s.code+'" data-v="'+(sd.dif||0)+'">'+
-    '<span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span></div>'+
-    '<span id="FL'+s.code+'" style="font-size:.72rem;color:var(--muted);margin-left:6px;">'+(sd.dif?['','易','普通','やや難','難','激難'][sd.dif]:'未評価')+'</span></div>'+
-    '<div style="font-size:.76rem;font-weight:700;color:var(--text);margin-bottom:6px;">💬 口コミ・コメント</div>'+
-    '<div class="clist" id="CM'+s.code+'">'+cmtHTML+'</div>'+
-    '<div class="cform">'+
-    '<textarea class="cinp" id="CI'+s.code+'" placeholder="感想・アドバイスを書いてください..."></textarea>'+
-    '<button class="bsub" onclick="AC(\''+s.code+'\')">投稿する</button>'+
-    '</div></div></div>';
+    '<div class="rev-list" id="RL2'+s.code+'">'+cmtHTML+'</div>'+
+    '<div class="rev-input-area">'+
+      '<div class="rev-input-ttl">✏️ あなたの評価を投稿</div>'+
+      '<div class="rev-stars-row">'+
+        '<span class="rev-stars-lbl">おすすめ度</span>'+
+        '<div id="TR'+s.code+'" style="display:flex;gap:2px">'+
+          '<span class="tmp-star" data-v="1">☆</span><span class="tmp-star" data-v="2">☆</span><span class="tmp-star" data-v="3">☆</span><span class="tmp-star" data-v="4">☆</span><span class="tmp-star" data-v="5">☆</span>'+
+        '</div>'+
+        '<span id="TRL'+s.code+'" style="font-size:.72rem;color:var(--muted)">未選択</span>'+
+      '</div>'+
+      '<div class="rev-stars-row">'+
+        '<span class="rev-stars-lbl">難易度</span>'+
+        '<div id="TF'+s.code+'" style="display:flex;gap:2px">'+
+          '<span class="tmp-star" data-v="1">☆</span><span class="tmp-star" data-v="2">☆</span><span class="tmp-star" data-v="3">☆</span><span class="tmp-star" data-v="4">☆</span><span class="tmp-star" data-v="5">☆</span>'+
+        '</div>'+
+        '<span id="TFL'+s.code+'" style="font-size:.72rem;color:var(--muted)">未選択</span>'+
+      '</div>'+
+      '<div class="cform" style="margin-top:6px">'+
+        '<textarea class="cinp" id="CI'+s.code+'" placeholder="感想・アドバイス（任意）..."></textarea>'+
+        '<button class="bsub" onclick="AC(\''+s.code+'\')" style="align-self:flex-end">投稿する</button>'+
+      '</div>'+
+    '</div>'+
+    '</div></div>';
 }
 
 // ============================================================
@@ -842,28 +868,82 @@ function RC(){
 }
 
 // ============================================================
-// EXPAND / STARS
+// EXPAND / STARS / REVIEWS
 // ============================================================
-function IS(code){
-  ['R','F'].forEach(function(pfx){
-    var wrap=document.getElementById(pfx+code);if(!wrap)return;
-    var tp=wrap.dataset.tp;var stars=wrap.querySelectorAll('span');var sd=GD(code);
-    var cur=tp==='rat'?sd.rat||0:sd.dif||0;UDS(wrap,cur,tp);
-    stars.forEach(function(s,i){
-      s.onmouseover=function(){UDS(wrap,i+1,tp,true)};
-      s.onmouseout=function(){var d2=GD(code);UDS(wrap,tp==='rat'?(d2.rat||0):(d2.dif||0),tp)};
-      s.onclick=function(){
-        var d2=GD(code);
-        var s2=GSC(code);
-        s2[tp]=i+1;SSC(code,s2);
-        UDS(wrap,i+1,tp);
-        var lbl=document.getElementById((tp==='rat'?'RL':'FL')+code);
-        if(lbl){if(tp==='rat')lbl.textContent=(i+1)+'/5';else lbl.textContent=['','易','普通','やや難','難','激難'][i+1]}
-        RC();
+// 一時的な評価値（投稿前バッファ）
+var tmpRat={};var tmpDif={};
+
+function initStars(code){
+  // おすすめ度
+  var trWrap=document.getElementById('TR'+code);
+  if(trWrap){
+    var spans=trWrap.querySelectorAll('.tmp-star');
+    spans.forEach(function(sp,i){
+      sp.onmouseover=function(){updateTmpStars(trWrap,'rat',i+1)};
+      sp.onmouseout=function(){updateTmpStars(trWrap,'rat',tmpRat[code]||0)};
+      sp.onclick=function(){
+        tmpRat[code]=i+1;
+        updateTmpStars(trWrap,'rat',i+1);
+        var lbl=document.getElementById('TRL'+code);
+        if(lbl)lbl.textContent=(i+1)+'/5';
       };
     });
+    updateTmpStars(trWrap,'rat',tmpRat[code]||0);
+    var lbl=document.getElementById('TRL'+code);
+    if(lbl)lbl.textContent=tmpRat[code]?(tmpRat[code]+'/5'):'未選択';
+  }
+  // 難易度
+  var tfWrap=document.getElementById('TF'+code);
+  if(tfWrap){
+    var difLbls=['','易','普通','やや難','難','激難'];
+    var spans2=tfWrap.querySelectorAll('.tmp-star');
+    spans2.forEach(function(sp,i){
+      sp.onmouseover=function(){updateTmpStars(tfWrap,'dif',i+1)};
+      sp.onmouseout=function(){updateTmpStars(tfWrap,'dif',tmpDif[code]||0)};
+      sp.onclick=function(){
+        tmpDif[code]=i+1;
+        updateTmpStars(tfWrap,'dif',i+1);
+        var lbl=document.getElementById('TFL'+code);
+        if(lbl)lbl.textContent=difLbls[i+1];
+      };
+    });
+    updateTmpStars(tfWrap,'dif',tmpDif[code]||0);
+    var lbl2=document.getElementById('TFL'+code);
+    if(lbl2)lbl2.textContent=tmpDif[code]?difLbls[tmpDif[code]]:'未選択';
+  }
+}
+
+function updateTmpStars(wrap,tp,val){
+  var ac=tp==='dif'?'#e74c3c':'#f1c40f';
+  wrap.querySelectorAll('.tmp-star').forEach(function(s,i){
+    s.textContent=i<val?'★':'☆';
+    s.style.color=i<val?ac:'#bdc3c7';
   });
 }
+
+// レビューをカード形式でレンダリング
+function renderRevs(code,revs){
+  if(!revs||!revs.length)return '<div class="ecmnt">まだ評価・口コミがありません</div>';
+  var difLbls=['','易','普通','やや難','難','激難'];
+  return revs.map(function(r,i){
+    var num=revs.length-i;
+    var ratStars='';
+    if(r.rat>0)for(var j=1;j<=5;j++)ratStars+=(j<=r.rat?'<span style="color:#f1c40f">★</span>':'<span style="color:#bdc3c7">☆</span>');
+    var difBdg=r.dif?'<span class="rev-dif">'+difLbls[r.dif]+'</span>':'';
+    var txt=r.tx?'<div class="rev-txt">'+EH(r.tx)+'</div>':'';
+    return '<div class="rev-item">'+
+      '<div class="rev-meta">'+
+        '<span class="rev-num">👤 投稿'+num+'</span>'+
+        (ratStars?'<span class="rev-stars">'+ratStars+'</span>':'')+
+        difBdg+
+        '<span class="rev-date">'+EH(r.dt||'')+'</span>'+
+        '<button class="rev-del" onclick="DC(''+code+'','+i+')">✕</button>'+
+      '</div>'+
+      txt+
+    '</div>';
+  }).join('');
+}
+
 function UDS(wrap,val,tp){
   var ac=tp==='dif'?'#e74c3c':'#f1c40f';
   wrap.querySelectorAll('span').forEach(function(s,i){s.textContent=i<val?'★':'☆';s.style.color=i<val?ac:'#bdc3c7'});
@@ -872,18 +952,13 @@ function XP(code){
   var el=document.getElementById('X'+code);if(!el)return;
   var was=el.classList.contains('open');el.classList.toggle('open');
   if(!was){
-    // 展開時に最新共有データを取得してから星・口コミを更新
+    // initStarsを即時実行（バッファ値で星を初期化）
+    initStars(code);
+    // 最新レビューを取得して表示
     loadShared().then(function(){
-      IS(code);
-      // 口コミ欄を最新に更新
       var s=GSC(code);
-      var cl=document.getElementById('CM'+code);
-      if(cl)cl.innerHTML=s.cmt&&s.cmt.length?renderCmts(code,s.cmt):'<div class="ecmnt">口コミがまだありません</div>';
-      // 星ラベルも更新
-      var rlbl=document.getElementById('RL'+code);
-      if(rlbl)rlbl.textContent=s.rat?s.rat+'/5':'未評価';
-      var flbl=document.getElementById('FL'+code);
-      if(flbl)flbl.textContent=s.dif?['','易','普通','やや難','難','激難'][s.dif]:'未評価';
+      var cl=document.getElementById('RL2'+code);
+      if(cl)cl.innerHTML=renderRevs(code,s.cmt);
     });
   }
 }
@@ -937,20 +1012,35 @@ function TC(code){
   UPD();if(st.cf)RC();
 }
 function AC(code){
-  var inp=document.getElementById('CI'+code);if(!inp||!inp.value.trim())return;
+  var inp=document.getElementById('CI'+code);
+  var rat=tmpRat[code]||0;
+  var dif=tmpDif[code]||0;
+  var tx=(inp&&inp.value.trim())||'';
+  // 何も入力されていない場合は何もしない
+  if(!rat&&!dif&&!tx){alert('おすすめ度・難易度・コメントのいずれかを入力してください');return;}
   var s=GSC(code);if(!s.cmt)s.cmt=[];
   var now=new Date();
   var dt=now.getFullYear()+'/'+(now.getMonth()+1<10?'0':'')+(now.getMonth()+1)+'/'+(now.getDate()<10?'0':'')+now.getDate();
-  s.cmt.unshift({tx:inp.value.trim(),dt:dt});SSC(code,s);inp.value='';
-  var cl=document.getElementById('CM'+code);
-  if(cl)cl.innerHTML=renderCmts(code,s.cmt);
+  // レビューとして保存（rat・dif・txを1件にまとめる）
+  s.cmt.unshift({rat:rat,dif:dif,tx:tx,dt:dt});
+  // 最新の評価を集計してrat/difを更新（全レビューの最新値）
+  s.rat=rat||s.rat;s.dif=dif||s.dif;
+  SSC(code,s);
+  if(inp)inp.value='';
+  // バッファクリア
+  tmpRat[code]=0;tmpDif[code]=0;
+  initStars(code); // 星をリセット
+  var cl=document.getElementById('RL2'+code);
+  if(cl)cl.innerHTML=renderRevs(code,s.cmt);
+  // カードのサマリー星も更新
+  RC();
 }
 function DC(code,idx){
-  if(!confirm('このコメントを削除しますか？'))return;
+  if(!confirm('このレビューを削除しますか？'))return;
   var s=GSC(code);if(!s.cmt)s.cmt=[];
   s.cmt.splice(idx,1);SSC(code,s);
-  var cl=document.getElementById('CM'+code);
-  if(cl)cl.innerHTML=s.cmt.length?renderCmts(code,s.cmt):'<div class="ecmnt">口コミがまだありません</div>';
+  var cl=document.getElementById('RL2'+code);
+  if(cl)cl.innerHTML=renderRevs(code,s.cmt);
 }
 function renderCmts(code,cmts){
   return cmts.map(function(c,i){
