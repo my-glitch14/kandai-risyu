@@ -269,7 +269,8 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
     <button class="fbtn" data-gf="bas" onclick="GF('bas')">基本</button>
     <button class="fbtn" data-gf="dev" onclick="GF('dev')">発展</button>
     <button class="fbtn" data-gf="app" onclick="GF('app')">応用</button>
-    <button class="fbtn cm" data-cf="1" onclick="CF()">✅ 済のみ</button>
+    <button class="fbtn" data-hm="done" onclick="HM('done')">🙈 履修済を除く</button>
+    <button class="fbtn" data-hm="done_reg" onclick="HM('done_reg')">🙈 済・登録済を除く</button>
     <select class="srt" id="ss" onchange="RC()">
       <option value="code">コード順</option>
       <option value="name">科目名順</option>
@@ -543,7 +544,7 @@ var D=[
 // ============================================================
 // STATE & STORAGE
 // ============================================================
-var st={sf:'all',yf:'all',gf:'all',cf:false,q:''};
+var st={sf:'all',yf:'all',gf:'all',hm:'none',q:''};
 var ttSem='sp';
 var ttView='mine';
 
@@ -583,7 +584,14 @@ function SF(v){
 }
 function YF(v){st.yf=v;document.querySelectorAll('[data-yf]').forEach(function(b){b.classList.toggle('on',b.dataset.yf===v)});RC()}
 function GF(v){st.gf=v;document.querySelectorAll('[data-gf]').forEach(function(b){b.classList.toggle('on',b.dataset.gf===v)});RC()}
-function CF(){st.cf=!st.cf;document.querySelector('[data-cf]').classList.toggle('on',st.cf);RC()}
+function HM(v){
+  // 同じボタンを押したらトグル解除
+  st.hm=(st.hm===v)?'none':v;
+  document.querySelectorAll('[data-hm]').forEach(function(b){
+    b.classList.toggle('on',b.dataset.hm===st.hm);
+  });
+  RC();
+}
 
 // ============================================================
 // RENDER CARD
@@ -659,7 +667,9 @@ function RC(){
     if(st.yf==='1'&&s.year!=='１年次')return false;
     if(st.yf==='2'&&s.year!=='２年次')return false;
     if(st.gf!=='all'&&s.group!==st.gf)return false;
-    if(st.cf&&!GD(s.code).done)return false;
+    var _sd=GD(s.code);
+    if(st.hm==='done'&&_sd.done)return false;
+    if(st.hm==='done_reg'&&(_sd.done||_sd.reg))return false;
     if(q&&s.name.toLowerCase().indexOf(q)<0&&s.teacher.toLowerCase().indexOf(q)<0&&s.code.indexOf(q)<0)return false;
     return true;
   });
@@ -930,8 +940,8 @@ function renderTT(){
   DAYS.forEach(function(d){PERIODS.forEach(function(p){cells[d+'_'+p]=[]})});
   D.forEach(function(s){
     var sd=GD(s.code);
-    // 自分モード：履修済み or 履修登録済みのみ表示
-    if(isMine&&!sd.done&&!sd.reg)return;
+    // 自分モード：履修登録済みのみ表示（履修済みは除外）
+    if(isMine&&!sd.reg)return;
     var slots=parseSched(s.schedule,sem);
     slots.forEach(function(slot){var key=slot.day+'_'+slot.period;if(cells[key])cells[key].push(s);});
   });
