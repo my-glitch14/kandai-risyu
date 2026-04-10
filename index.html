@@ -1077,14 +1077,14 @@ function UPD(){
   var needList=document.getElementById('need-list');
   if(needList){
     var items=[];
-    items.push(mkReqRow('基本科目群（卒業）',bas,16,16));
-    items.push(mkReqRow('発展科目群（卒業）',dev,16,16));
-    items.push(mkReqRow('応用・実践科目群（卒業）',app,12,12));
-    items.push(mkReqRow('卒業合計',gradTot,48,48));
-    items.push(mkReqRow('短答免除 財務会計系',exFa,10,10));
-    items.push(mkReqRow('短答免除 管理会計系',exMa,6,6));
-    items.push(mkReqRow('短答免除 監査系',exAu,6,6));
-    items.push(mkReqRow('短答免除 合計',exTot,28,28));
+    items.push(mkReqRowWithReg('基本科目群（卒業）',bas,regBas,16));
+    items.push(mkReqRowWithReg('発展科目群（卒業）',dev,regDev,16));
+    items.push(mkReqRowWithReg('応用・実践科目群（卒業）',app,regApp,12));
+    items.push(mkReqRowWithReg('卒業合計',gradTot,regGradTot,48));
+    items.push(mkReqRowWithReg('短答免除 財務会計系',exFa,regExFa,10));
+    items.push(mkReqRowWithReg('短答免除 管理会計系',exMa,regExMa,6));
+    items.push(mkReqRowWithReg('短答免除 監査系',exAu,regExAu,6));
+    items.push(mkReqRowWithReg('短答免除 合計',exTot,(regExFa+regExMa+regExAu),28));
     needList.innerHTML=items.join('');
   }
 
@@ -1122,10 +1122,15 @@ function setTsItem(id,v,max){
   if(el)el.style.borderTop='3px solid '+(v>=max?'var(--spring)':'var(--border)');
 }
 function mkReqRow(name,v,min,max){
+  return mkReqRowWithReg(name,v,0,min);
+}
+function mkReqRowWithReg(name,v,reg,min){
+  var total=v+reg;
   var cls=v>=min?'ok':v>=min*0.7?'near':'ng';
   var rest=Math.max(0,min-v);
   var mark=v>=min?'✅':'あと'+rest+'単位';
-  return '<div class="req-row"><span class="req-name">'+name+'</span><span class="req-val '+cls+'">'+v+'単位 '+mark+'</span></div>';
+  var regSpan=reg>0?'<span style="color:#1565c0;font-size:.72rem;font-weight:600;margin-left:4px">（登録含: '+total+'）</span>':'';
+  return '<div class="req-row"><span class="req-name">'+name+'</span><span class="req-val '+cls+'">'+v+'単位 '+mark+regSpan+'</span></div>';
 }
 
 // 短答免除ボックス: 履修済み数値 + 括弧（登録済含）
