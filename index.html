@@ -153,6 +153,13 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .nores{text-align:center;padding:40px 20px;color:var(--muted);font-size:.88rem}
 .ecmnt{color:var(--muted);font-size:.76rem;font-style:italic}
 
+/* ===== クイック履修ボタン ===== */
+.quick-done{display:inline-flex;align-items:center;gap:5px;border:none;border-radius:20px;padding:5px 14px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
+.quick-done.undone{background:#f0f4ff;color:var(--primary);border:1.5px solid var(--border)}
+.quick-done.undone:hover{background:#dce8ff;border-color:var(--primary)}
+.quick-done.qdone{background:#d5f5e3;color:#1a7c3e;border:1.5px solid #a8e6c0}
+.quick-done.qdone:hover{background:#f8e7e7;color:var(--autumn);border-color:#f5aaaa}
+
 /* ===== 時間割ビュー ===== */
 .tt-wrap{padding:12px 16px;overflow-x:auto}
 .tt-table{border-collapse:collapse;width:100%;min-width:700px;font-size:.75rem}
@@ -160,9 +167,10 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .tt-table th{background:var(--primary);color:#fff;font-weight:700;font-size:.72rem}
 .tt-table .day-hdr{background:#eef2ff;color:var(--primary);font-weight:700}
 .tt-cell{min-height:52px;position:relative}
-.tt-item{background:#e3f2fd;border-radius:6px;padding:3px 5px;margin:2px 0;cursor:pointer;border-left:3px solid var(--c-fa);font-size:.68rem;line-height:1.3;text-align:left}
+.tt-item{background:#e3f2fd;border-radius:6px;padding:3px 5px;margin:2px 0;cursor:default;border-left:3px solid var(--c-fa);font-size:.68rem;line-height:1.3;text-align:left;position:relative}
 .tt-item:hover{opacity:.85}
-.tt-item.done-item{opacity:.6;text-decoration:line-through}
+.tt-item.done-item::after{content:'✓';position:absolute;top:2px;right:4px;font-size:.7rem;color:var(--spring);font-weight:900}
+.tt-item.not-mine{opacity:.35;filter:grayscale(.4)}
 .tt-name{font-weight:700;color:#1a237e}
 .tt-teacher{color:var(--muted);font-size:.63rem}
 /* 系統別色 */
@@ -172,14 +180,20 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .tt-item.s-la{border-left-color:var(--c-la);background:#fff3e0}
 .tt-item.s-ec{border-left-color:var(--c-ec);background:#e0f2f1}
 .tt-item.s-ot{border-left-color:var(--c-ot);background:#eceff1}
-.tt-legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-size:.72rem}
+.tt-legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;font-size:.72rem;align-items:center}
 .tt-leg-item{display:flex;align-items:center;gap:4px}
 .tt-leg-dot{width:10px;height:10px;border-radius:2px}
-.tt-semester-tab{display:flex;gap:0;margin-bottom:10px}
+.tt-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.tt-stab-group{display:flex;gap:0}
 .tt-stab{padding:6px 16px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:.78rem;font-family:inherit;font-weight:600;color:var(--muted)}
 .tt-stab:first-child{border-radius:8px 0 0 8px}
 .tt-stab:last-child{border-radius:0 8px 8px 0}
 .tt-stab.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.tt-view-stab{padding:6px 14px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:.78rem;font-family:inherit;font-weight:600;color:var(--muted)}
+.tt-view-stab:first-child{border-radius:8px 0 0 8px}
+.tt-view-stab:last-child{border-radius:0 8px 8px 0}
+.tt-view-stab.mine.on{background:var(--spring);color:#fff;border-color:var(--spring)}
+.tt-view-stab.all.on{background:#e65100;color:#fff;border-color:#e65100}
 
 @media(max-width:600px){
   .sbar{padding:8px 12px;gap:8px}
@@ -209,9 +223,8 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 <!-- ===== 共通ステータスバー ===== -->
 <div class="sbar">
   <div class="sbar-section">
-    <div class="stat-item"><div class="snum p" id="tc">0</div><div class="slbl">総単位</div></div>
-    <div class="stat-item"><div class="snum g" id="cc">0</div><div class="slbl">履修済み</div></div>
-    <div class="stat-item"><div class="snum o" id="rc">0</div><div class="slbl">残り</div></div>
+    <div class="stat-item"><div class="snum g" id="cc">0</div><div class="slbl">履修済み単位</div></div>
+    <div class="stat-item"><div class="snum o" id="rc">0</div><div class="slbl">残り単位</div></div>
     <div class="stat-item"><div class="snum" id="cn">0</div><div class="slbl">履修科目数</div></div>
   </div>
   <div class="sbar-section">
@@ -251,9 +264,10 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
     <select class="srt" id="ss" onchange="RC()">
       <option value="code">コード順</option>
       <option value="name">科目名順</option>
-      <option value="cred">単位数順</option>
-      <option value="rate">評価順</option>
       <option value="group">科目群順</option>
+      <option value="rate">おすすめ度順</option>
+      <option value="dif">難易度順</option>
+      <option value="cred">単位数順</option>
     </select>
   </div>
   <div class="lst" id="sl"></div>
@@ -347,17 +361,25 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 <!-- ===== TAB: 時間割 ===== -->
 <div id="tab-tt" class="tab-pane">
   <div class="tt-wrap">
-    <div class="tt-semester-tab">
-      <button class="tt-stab on" onclick="TTSem('sp',this)">🌸 春学期</button>
-      <button class="tt-stab" onclick="TTSem('au',this)">🍂 秋学期</button>
+    <div class="tt-controls">
+      <div class="tt-stab-group">
+        <button class="tt-stab on" onclick="TTSem('sp',this)">🌸 春学期</button>
+        <button class="tt-stab" onclick="TTSem('au',this)">🍂 秋学期</button>
+      </div>
+      <div class="tt-stab-group">
+        <button class="tt-view-stab mine on" onclick="TTView('mine',this)">✅ 自分の時間割</button>
+        <button class="tt-view-stab all" onclick="TTView('all',this)">📋 全体時間割</button>
+      </div>
+      <span style="font-size:.7rem;color:var(--muted)" id="tt-hint">履修済み科目のみ表示</span>
     </div>
-    <div class="tt-legend" id="tt-legend">
+    <div class="tt-legend">
       <div class="tt-leg-item"><div class="tt-leg-dot" style="background:var(--c-fa)"></div>財務会計</div>
       <div class="tt-leg-item"><div class="tt-leg-dot" style="background:var(--c-ma)"></div>管理会計</div>
       <div class="tt-leg-item"><div class="tt-leg-dot" style="background:var(--c-au)"></div>監査</div>
       <div class="tt-leg-item"><div class="tt-leg-dot" style="background:var(--c-la)"></div>法律・税務</div>
       <div class="tt-leg-item"><div class="tt-leg-dot" style="background:var(--c-ec)"></div>経営・経済</div>
       <div class="tt-leg-item"><div class="tt-leg-dot" style="background:var(--c-ot)"></div>横断・演習等</div>
+      <div class="tt-leg-item" style="margin-left:8px"><span style="font-size:.9rem">✓</span>&nbsp;履修済み</div>
     </div>
     <div id="tt-content"></div>
   </div>
@@ -514,6 +536,7 @@ var D=[
 // ============================================================
 var st={sf:'all',yf:'all',gf:'all',cf:false,q:''};
 var ttSem='sp';
+var ttView='mine';
 
 function GS(){try{return JSON.parse(localStorage.getItem('ksu2025')||'{}')}catch(e){return{}}}
 function SS(d){localStorage.setItem('ksu2025',JSON.stringify(d))}
@@ -571,15 +594,14 @@ function BC2(s){
   var exemptBdg=s.exempt?'<span class="bdg bex">⚖️免除対象</span>':'';
   var reqBdg=s.required?'<span class="bdg breq">必修</span>':'';
 
+  var qdoneBtn='<button class="quick-done '+(sd.done?'qdone':'undone')+'" onclick="event.stopPropagation();QD(\''+s.code+'\')" id="QD'+s.code+'">'+(sd.done?'✅ 履修済み（取消）':'☑ 履修済みにする')+'</button>';
   return '<div class="crd'+(sd.done?' done':'')+'" id="C'+s.code+'">'+
     '<div class="chdr" onclick="XP(\''+s.code+'\')">'+
-    '<div class="chk" onclick="event.stopPropagation()"><input type="checkbox" id="K'+s.code+'"'+(sd.done?' checked':'')+' onchange="TC(\''+s.code+'\')"></div>'+
     '<div class="cmain">'+
     '<div class="ctrow">'+
       '<span class="cname">'+EH(s.name)+'</span>'+
       '<span class="ccode">'+s.code+'</span>'+
       reqBdg+exemptBdg+
-      (sd.done?'<span class="bdone">✓ 履修済</span>':'')+
       '<span class="bcred">'+s.credits+'単位</span>'+
     '</div>'+
     '<div class="cmeta">'+
@@ -591,9 +613,9 @@ function BC2(s){
       '<span class="mitem">👤 '+EH(s.teacher)+'</span>'+
       '<span class="mitem">🕐 '+EH(s.schedule)+'</span>'+
     '</div>'+
-    '<div style="margin-top:3px;display:flex;align-items:center;">'+rStr+dStr+cCnt+'</div>'+
+    '<div style="margin-top:5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+qdoneBtn+(rStr?'<span style="display:flex;align-items:center;gap:1px">'+rStr+'</span>':'')+(dStr||'')+(cCnt||'')+'</div>'+
     '</div>'+
-    '<div style="color:#bdc3c7;font-size:.75rem;padding-top:4px;">▼</div>'+
+    '<div style="color:#bdc3c7;font-size:.75rem;padding-top:4px;flex-shrink:0">▼</div>'+
     '</div>'+
     '<div class="xpnd" id="X'+s.code+'">'+
     '<div class="rvttl">📝 評価・口コミ</div>'+
@@ -633,6 +655,7 @@ function RC(){
   if(srt==='name')data.sort(function(a,b){return a.name.localeCompare(b.name,'ja')});
   else if(srt==='cred')data.sort(function(a,b){return b.credits-a.credits});
   else if(srt==='rate')data.sort(function(a,b){return(GD(b.code).rat||0)-(GD(a.code).rat||0)});
+  else if(srt==='dif')data.sort(function(a,b){return(GD(b.code).dif||0)-(GD(a.code).dif||0)});
   else if(srt==='group'){
     var go={int:0,bas:1,dev:2,app:3};
     data.sort(function(a,b){return(go[a.group]||0)-(go[b.group]||0)||a.code.localeCompare(b.code)});
@@ -671,6 +694,20 @@ function XP(code){
   var el=document.getElementById('X'+code);if(!el)return;
   var was=el.classList.contains('open');el.classList.toggle('open');
   if(!was)IS(code);
+}
+function QD(code){
+  var d=GD(code);d.done=!d.done;SD(code,d);
+  // カード全体を更新
+  var card=document.getElementById('C'+code);
+  if(card){
+    card.classList.toggle('done',d.done);
+    var btn=document.getElementById('QD'+code);
+    if(btn){
+      btn.textContent=d.done?'✅ 履修済み（取消）':'☑ 履修済みにする';
+      btn.className='quick-done '+(d.done?'qdone':'undone');
+    }
+  }
+  UPD();if(st.cf)RC();
 }
 function TC(code){
   var d=GD(code);d.done=!d.done;SD(code,d);
@@ -829,43 +866,58 @@ function parseSched(sch,sem){
 
 function TTSem(sem,btn){
   ttSem=sem;
-  document.querySelectorAll('.tt-stab').forEach(function(b){b.classList.remove('on')});
+  document.querySelectorAll('.tt-stab-group:first-child .tt-stab').forEach(function(b){b.classList.remove('on')});
   btn.classList.add('on');
+  renderTT();
+}
+function TTView(view,btn){
+  ttView=view;
+  document.querySelectorAll('.tt-view-stab').forEach(function(b){b.classList.remove('on')});
+  btn.classList.add('on');
+  var hint=document.getElementById('tt-hint');
+  if(hint)hint.textContent=view==='mine'?'履修済み科目のみ表示':'全科目を表示（薄いのは未登録）';
   renderTT();
 }
 
 function renderTT(){
   var sem=ttSem;
-  // セルにデータを構築
+  var isMine=(ttView==='mine');
+  var sysCls={fa:'s-fa',ma:'s-ma',au:'s-au',la:'s-la',ec:'s-ec',ot:'s-ot'};
   var cells={};
   DAYS.forEach(function(d){PERIODS.forEach(function(p){cells[d+'_'+p]=[]})});
-
   D.forEach(function(s){
+    var sd=GD(s.code);
+    if(isMine&&!sd.done)return;
     var slots=parseSched(s.schedule,sem);
-    slots.forEach(function(slot){
-      var key=slot.day+'_'+slot.period;
-      if(cells[key])cells[key].push(s);
-    });
+    slots.forEach(function(slot){var key=slot.day+'_'+slot.period;if(cells[key])cells[key].push(s);});
   });
-
-  var sysCls={fa:'s-fa',ma:'s-ma',au:'s-au',la:'s-la',ec:'s-ec',ot:'s-ot'};
-
-  var html='<table class="tt-table"><thead><tr><th>時限</th>';
+  var allCells={};
+  if(!isMine){
+    DAYS.forEach(function(d){PERIODS.forEach(function(p){allCells[d+'_'+p]=[]})});
+    D.forEach(function(s){
+      var slots=parseSched(s.schedule,sem);
+      slots.forEach(function(slot){var key=slot.day+'_'+slot.period;if(allCells[key])allCells[key].push(s);});
+    });
+  }
+  var useCells=isMine?cells:allCells;
+  var times=['9:00~','10:40~','13:00~','14:40~','16:20~'];
+  var html='<table class="tt-table"><thead><tr><th style="min-width:44px">時限</th>';
   DAYS.forEach(function(d){html+='<th class="day-hdr">'+d+'曜</th>'});
   html+='</tr></thead><tbody>';
-
   PERIODS.forEach(function(p){
-    var times=['9:00','10:40','13:00','14:40','16:20'];
-    html+='<tr><td class="day-hdr" style="font-size:.68rem;white-space:nowrap">'+p+'限<br><span style="font-weight:400;color:var(--muted)">'+times[p-1]+'</span></td>';
+    html+='<tr><td class="day-hdr" style="font-size:.66rem;white-space:nowrap;padding:3px">'+p+'限<br><span style="font-weight:400;color:var(--muted);font-size:.58rem">'+times[p-1]+'</span></td>';
     DAYS.forEach(function(d){
       html+='<td class="tt-cell">';
-      var list=cells[d+'_'+p]||[];
+      var list=useCells[d+'_'+p]||[];
       list.forEach(function(s){
         var sd=GD(s.code);
         var sc=sysCls[s.system]||'s-ot';
-        html+='<div class="tt-item '+sc+(sd.done?' done-item':'')+'" onclick="switchTab(\'list\')" title="'+EH(s.name)+'">'+
-          '<div class="tt-name">'+EH(s.name.length>12?s.name.substr(0,12)+'…':s.name)+'</div>'+
-          '<div class="tt-teacher">'+EH(s.teacher)+(sd.done?' ✓':'')+'</div>'+
+        var notMine=(!isMine&&!sd.done)?' not-mine':'';
+        var doneCls=sd.done?' done-item':'';
+        var shortName=s.name.length>13?s.name.substr(0,13)+'…':s.name;
+        html+='<div class="tt-item '+sc+doneCls+notMine+'" title="'+EH(s.name)+' / '+EH(s.teacher)+'">'+
+          '<div class="tt-name">'+EH(shortName)+'</div>'+
+          '<div class="tt-teacher">'+EH(s.teacher.split('　')[0])+'</div>'+
           '</div>';
       });
       html+='</td>';
