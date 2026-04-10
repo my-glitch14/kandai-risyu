@@ -286,6 +286,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
       <option value="group">科目群順</option>
       <option value="rate">おすすめ度順</option>
       <option value="dif">難易度順</option>
+      <option value="exempt">免除対象優先</option>
       <option value="cred">単位数順</option>
     </select>
   </div>
@@ -767,6 +768,7 @@ function RC(){
   else if(srt==='cred')data.sort(function(a,b){return b.credits-a.credits});
   else if(srt==='rate')data.sort(function(a,b){return(GD(b.code).rat||0)-(GD(a.code).rat||0)});
   else if(srt==='dif')data.sort(function(a,b){return(GD(b.code).dif||0)-(GD(a.code).dif||0)});
+  else if(srt==='exempt')data.sort(function(a,b){return(b.exempt?1:0)-(a.exempt?1:0)||a.code.localeCompare(b.code)});
   else if(srt==='group'){
     var go={int:0,bas:1,dev:2,app:3};
     data.sort(function(a,b){return(go[a.group]||0)-(go[b.group]||0)||a.code.localeCompare(b.code)});
