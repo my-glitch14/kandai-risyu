@@ -592,33 +592,48 @@ function SS(d){localStorage.setItem('ksu2025',JSON.stringify(d))}
 function GDpersonal(c){var s=GS();return s[c]||{done:false,reg:false}}
 function SDpersonal(c,d){var s=GS();s[c]=d;SS(s)}
 
-// ---------- 共有データ（window.storage shared）: rat, dif, cmt ----------
-// ローカルキャッシュ（非同期取得後に格納）
-var sharedCache={};  // {code: {rat:0, dif:0, cmt:[]}}
+// ---------- 共有データ: rat, dif, cmt ----------
+// window.storage（Claude Artifact環境）が使える場合は共有、使えない場合はlocalStorageにフォールバック
+var sharedCache={};
 var sharedLoaded=false;
+var useWindowStorage=(typeof window!=='undefined'&&window.storage&&typeof window.storage.get==='function');
 
 // 全共有データを一括取得してキャッシュに格納
 async function loadShared(){
-  try{
-    var result=await window.storage.get('ksu_shared_reviews',true);
-    if(result&&result.value){
-      sharedCache=JSON.parse(result.value);
-    }
-  }catch(e){sharedCache={};}
+  if(useWindowStorage){
+    try{
+      var result=await window.storage.get('ksu_shared_reviews',true);
+      if(result&&result.value){sharedCache=JSON.parse(result.value);}
+    }catch(e){useWindowStorage=false;}
+  }
+  // windowStorageが使えない場合はlocalStorageから読み込み
+  if(!useWindowStorage){
+    try{
+      var local=localStorage.getItem('ksu_shared_reviews');
+      if(local)sharedCache=JSON.parse(local);
+    }catch(e){sharedCache={};}
+  }
+  // 起動時にローカルキャッシュで初期化（同期的にも使えるよう）
   sharedLoaded=true;
 }
 
-// 共有データを保存（全件をまとめて1キーに）
+// 共有データを保存
 async function saveShared(){
-  try{
-    await window.storage.set('ksu_shared_reviews',JSON.stringify(sharedCache),true);
-  }catch(e){console.warn('shared save failed',e);}
+  if(useWindowStorage){
+    try{
+      await window.storage.set('ksu_shared_reviews',JSON.stringify(sharedCache),true);
+      return;
+    }catch(e){useWindowStorage=false;}
+  }
+  // フォールバック: localStorage
+  try{localStorage.setItem('ksu_shared_reviews',JSON.stringify(sharedCache));}
+  catch(e){console.warn('save failed',e);}
 }
 
-// 指定コードの共有データを取得（キャッシュから）
+// 同期的に最新キャッシュから取得
 function GSC(c){return sharedCache[c]||{rat:0,dif:0,cmt:[]};}
 
-// 指定コードの共有データを更新してサーバーへ保存
+// キャッシュを更新して非同期で保存
 function SSC(c,d){sharedCache[c]=d;saveShared();}
 
 // 統合GD: 個人データ+共有データをマージして返す
@@ -1273,12 +1288,14 @@ function switchTab(id){
 // INIT
 // ============================================================
 document.getElementById('si').addEventListener('input',function(){st.q=this.value;RC()});
-// 起動時: 共有データ取得→描画
-loadShared().then(function(){
-  RC();UPD();
-}).catch(function(){
-  RC();UPD();
-});
+// 起動時: まずlocalStorageから同期的にキャッシュを初期化して即描画
+try{
+  var _ls=localStorage.getItem('ksu_shared_reviews');
+  if(_ls)sharedCache=JSON.parse(_ls);
+}catch(e){}
+RC();UPD();
+// その後window.storageがあれば非同期で最新データを取得して再描画
+loadShared().then(function(){RC();UPD();}).catch(function(){});
 </script>
 </body>
 </html>
