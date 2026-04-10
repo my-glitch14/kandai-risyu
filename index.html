@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <title>関大 会計専門職大学院 シラバス管理</title>
 <style>
 :root{
@@ -937,7 +937,7 @@ function renderRevs(code,revs){
         (ratStars?'<span class="rev-stars">'+ratStars+'</span>':'')+
         difBdg+
         '<span class="rev-date">'+EH(r.dt||'')+'</span>'+
-        '<button class="rev-del" onclick="DC(''+code+'','+i+')">✕</button>'+
+        '<button class="rev-del" onclick="DC(\''+code+'\','+i+')">✕</button>'+
       '</div>'+
       txt+
     '</div>';
