@@ -445,6 +445,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
     <!-- CSVエクスポート -->
     <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
       <button class="csv-btn" onclick="exportCSV()">📥 履修状況をCSVエクスポート</button>
+      <button class="csv-btn" onclick="exportTimetableCSV()" style="background:#2e7d32">📅 時間割をCSVエクスポート</button>
     </div>
 
     <!-- 履修済み科目一覧 -->
@@ -1474,6 +1475,77 @@ function exportCSV(){
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
   a.href=url;a.download='関大シラバス_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// 時間割CSVエクスポート
+// ============================================================
+function exportTimetableCSV(){
+  var DAYS=['月','火','水','木','金','土'];
+  var PERIODS=[1,2,3,4,5];
+  var TIMES=['9:00~10:30','10:40~12:10','13:00~14:30','14:40~16:10','16:20~17:50'];
+  var SEMS=['sp','au'];
+  var SEM_LABELS={sp:'春学期',au:'秋学期'};
+
+  // ヘッダー行
+  // 列構成: 学期, 時限, 開始時刻, 月曜, 火曜, 水曜, 木曜, 金曜, 土曜
+  var header=['学期','時限','時刻','月曜','火曜','水曜','木曜','金曜','土曜'];
+  var rows=[header];
+
+  SEMS.forEach(function(sem){
+    // セル構築
+    var cells={};
+    DAYS.forEach(function(d){PERIODS.forEach(function(p){cells[d+'_'+p]=[];})});
+    D.forEach(function(s){
+      var slots=parseSched(s.schedule,sem);
+      slots.forEach(function(slot){
+        var key=slot.day+'_'+slot.period;
+        if(cells[key]){
+          var pd=GDpersonal(s.code);
+          var label=s.name;
+          if(s.class_)label+='('+s.class_+')';
+          label+=' ['+s.teacher+']';
+          if(pd.done)label+=' ✓';
+          else if(pd.reg)label+=' 📋';
+          cells[key].push(label);
+        }
+      });
+    });
+
+    // 空行区切り（春/秋の間）
+    if(rows.length>1)rows.push(['','','','','','','','','']);
+
+    // 学期ラベル行
+    rows.push([SEM_LABELS[sem],'','','','','','','','']);
+
+    PERIODS.forEach(function(p){
+      var row=[SEM_LABELS[sem], p+'限', TIMES[p-1]];
+      DAYS.forEach(function(d){
+        var cell=cells[d+'_'+p]||[];
+        row.push(cell.join(' / '));
+      });
+      rows.push(row);
+    });
+  });
+
+  // CSV生成（BOM付きUTF-8）
+  var csv='﻿'+rows.map(function(r){
+    return r.map(function(v){
+      var s=String(v==null?'':v);
+      if(s.indexOf(',')>=0||s.indexOf('"')>=0){
+        s='"'+s.replace(/"/g,'""')+'"';
+      }
+      return s;
+    }).join(',');
+  }).join('\r\n');
+
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='関大時間割_'+new Date().toISOString().slice(0,10)+'.csv';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
