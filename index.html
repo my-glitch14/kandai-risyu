@@ -235,24 +235,33 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 /* 短答免除 括弧表記 */
 .ts-reg{display:block;font-size:.72rem;color:#1565c0;font-weight:600;margin-top:2px}
 
-/* 成績バッジ */
-.grade-btn{display:inline-flex;align-items:center;gap:3px;border:1.5px solid var(--border);background:#fff;border-radius:16px;padding:3px 10px;font-size:.74rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;color:var(--muted)}
-.grade-btn:hover{border-color:var(--primary);color:var(--primary)}
-.grade-btn.shu{background:#fff3cd;color:#856404;border-color:#ffc107}
-.grade-btn.yu{background:#d1ecf1;color:#0c5460;border-color:#17a2b8}
-.grade-btn.ryo{background:#d4edda;color:#155724;border-color:#28a745}
-.grade-btn.ka{background:#f8d7da;color:#721c24;border-color:#dc3545}
-.grade-sel{display:none;gap:4px;flex-wrap:wrap;align-items:center}
-.grade-sel.open{display:flex}
 /* サマリーバッジ（カード上のスコア表示） */
 .sum-rat{display:inline-flex;align-items:center;gap:2px;background:#fffde7;border-radius:6px;padding:1px 7px;font-size:.68rem;font-weight:700;color:#856404}
 .sum-dif{display:inline-flex;align-items:center;gap:2px;background:#fff9e6;border-radius:6px;padding:1px 7px;font-size:.68rem;font-weight:700;color:#856404}
-/* GPAバー */
-.gpa-bar{background:#fff;border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);border:1.5px solid var(--border);margin-bottom:12px}
-.gpa-val{font-size:2rem;font-weight:800;color:var(--primary);line-height:1}
-.gpa-label{font-size:.7rem;color:var(--muted);margin-top:2px}
-.gpa-dist{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.gpa-item{font-size:.72rem;border-radius:8px;padding:2px 9px;font-weight:700}
+
+
+/* 履修計画チェッカー */
+.checker-card{background:#fff;border-radius:12px;padding:14px;box-shadow:var(--shadow);border:1.5px solid var(--border);margin-bottom:12px}
+.checker-ttl{font-size:.85rem;font-weight:800;color:var(--primary);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.scenario-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-bottom:10px}
+.scenario-item{background:var(--bg);border-radius:10px;padding:10px 12px;border:1.5px solid var(--border)}
+.scenario-item.ok{border-color:var(--spring);background:#f0fbf4}
+.scenario-item.warn{border-color:var(--accent);background:#fff8f0}
+.scenario-item.ng{border-color:var(--autumn);background:#fff5f5}
+.scenario-ttl{font-size:.72rem;font-weight:800;margin-bottom:6px}
+.scenario-item.ok .scenario-ttl{color:#1a7c3e}
+.scenario-item.warn .scenario-ttl{color:#e65100}
+.scenario-item.ng .scenario-ttl{color:#c0392b}
+.scenario-row{display:flex;justify-content:space-between;font-size:.71rem;margin-bottom:2px}
+.scenario-lbl{color:var(--muted)}
+.scenario-val{font-weight:700}
+.scenario-val.ok{color:var(--spring)}
+.scenario-val.ng{color:var(--autumn)}
+.scenario-val.near{color:var(--accent)}
+.sim-note{font-size:.68rem;color:var(--muted);margin-top:8px;line-height:1.5}
+/* CSVボタン */
+.csv-btn{display:inline-flex;align-items:center;gap:5px;background:var(--primary);color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s}
+.csv-btn:hover{background:var(--primary-light)}
 
 @media(max-width:600px){
   .sbar{padding:8px 12px;gap:8px}
@@ -286,7 +295,6 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
     <div class="stat-item"><div class="snum o" id="rc">0</div><div class="slbl">残り単位</div></div>
     <div class="stat-item"><div class="snum" id="cn">0</div><div class="slbl">履修済科目数</div></div>
     <div class="stat-item"><div class="snum" style="color:var(--c-fa)" id="rn">0</div><div class="slbl">履修登録数</div></div>
-    <div class="stat-item"><div class="snum" style="color:#7b1fa2" id="gpa-val">-</div><div class="slbl">GPA</div></div>
   </div>
   <div class="sbar-section">
     <div class="prog-wrap">
@@ -348,15 +356,6 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 <!-- ===== TAB: 要件チェック ===== -->
 <div id="tab-req" class="tab-pane">
   <div class="req-area">
-
-    <!-- GPA -->
-    <div class="gpa-bar">
-      <div style="display:flex;align-items:baseline;gap:8px">
-        <div class="gpa-val" id="gpa-val2">-</div>
-        <div class="gpa-label">GPA（4.0満点）<br><span style="font-size:.65rem">秀=4 / 優=3 / 良=2 / 可=1</span></div>
-        <div class="gpa-dist" id="gpa-dist" style="margin-top:0;margin-left:auto"></div>
-      </div>
-    </div>
 
     <!-- 卒業要件 -->
     <div class="req-card" id="grad-card">
@@ -434,6 +433,18 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
         <div class="req-ttl">📊 系統別履修状況</div>
         <div id="system-list"></div>
       </div>
+    </div>
+
+    <!-- 履修計画チェッカー -->
+    <div class="checker-card">
+      <div class="checker-ttl">📐 履修計画チェッカー</div>
+      <div class="scenario-grid" id="checker-grid"></div>
+      <div class="sim-note" id="checker-note"></div>
+    </div>
+
+    <!-- CSVエクスポート -->
+    <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="csv-btn" onclick="exportCSV()">📥 履修状況をCSVエクスポート</button>
     </div>
 
     <!-- 履修済み科目一覧 -->
@@ -648,7 +659,7 @@ var ttView='mine';
 // ---------- 個人データ（localStorage）: done, reg ----------
 function GS(){try{return JSON.parse(localStorage.getItem('ksu2025')||'{}')}catch(e){return{}}}
 function SS(d){localStorage.setItem('ksu2025',JSON.stringify(d))}
-function GDpersonal(c){var s=GS();return s[c]||{done:false,reg:false,grade:''}}
+function GDpersonal(c){var s=GS();return s[c]||{done:false,reg:false}}
 function SDpersonal(c,d){var s=GS();s[c]=d;SS(s)}
 
 // ---------- 共有データ（Supabase）: rat, dif, cmt ----------
@@ -808,12 +819,6 @@ function BC2(s){
   var sumRatStr=avgRat?'<span class="sum-rat">⭐'+avgRat.toFixed(1)+'</span>':'';
   var sumDifStr=avgDif?'<span class="sum-dif">🎯'+avgDif.toFixed(1)+'</span>':'';
   var cCnt=sd.cmt&&sd.cmt.length?'<span style="font-size:.68rem;color:var(--muted);">💬'+sd.cmt.length+'件</span>':'';
-  // 成績
-  var gradeMap={shu:'秀',yu:'優',ryo:'良',ka:'可'};
-  var curGrade=sd.grade||'';
-  var gradeLbl=curGrade?gradeMap[curGrade]:'成績を記録';
-  var gradeCls=curGrade?('grade-btn '+curGrade):'grade-btn';
-  var gradeBtn=sd.done?'<button class="'+gradeCls+'" onclick="event.stopPropagation();TGS(\''+s.code+'\')" id="GB'+s.code+'">📝 '+gradeLbl+'</button>':'';
   var cmtHTML=sd.cmt&&sd.cmt.length?renderRevs(s.code,sd.cmt):'<div class="ecmnt">まだ評価・口コミがありません</div>';
 
   var exemptBdg=s.exempt?'<span class="bdg bex">⚖️免除対象</span>':'';
@@ -840,7 +845,7 @@ function BC2(s){
       '<span class="mitem">👤 '+EH(s.teacher)+'</span>'+
       '<span class="mitem">🕐 '+EH(s.schedule)+'</span>'+
     '</div>'+
-    '<div style="margin-top:5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'+qdoneBtn+qregBtn+gradeBtn+sumRatStr+sumDifStr+cCnt+'</div>'+
+    '<div style="margin-top:5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'+qdoneBtn+qregBtn+sumRatStr+sumDifStr+cCnt+'</div>'+
     '</div>'+
     '<div style="color:#bdc3c7;font-size:.75rem;padding-top:4px;flex-shrink:0">▼</div>'+
     '</div>'+
@@ -1069,23 +1074,6 @@ function TC(code){
   if(card)card.classList.toggle('done',d.done);
   UPD();if(st.cf)RC();
 }
-// 成績選択: 未→秀→優→良→可→未のサイクル
-var gradeOrder=['','shu','yu','ryo','ka'];
-var gradeMap2={shu:'秀',yu:'優',ryo:'良',ka:'可'};
-function TGS(code){
-  var d=GD(code);
-  var cur=d.grade||'';
-  var idx=gradeOrder.indexOf(cur);
-  var next=gradeOrder[(idx+1)%gradeOrder.length];
-  d.grade=next;SD(code,d);
-  // ボタンを即更新
-  var btn=document.getElementById('GB'+code);
-  if(btn){
-    btn.textContent='📝 '+(next?gradeMap2[next]:'成績を記録');
-    btn.className=next?('grade-btn '+next):'grade-btn';
-  }
-  UPD();
-}
 function AC(code){
   var inp=document.getElementById('CI'+code);
   var rat=tmpRat[code]||0;
@@ -1130,7 +1118,7 @@ function UPD(){
   var bas=0,dev=0,app=0,tot=0;
   var exFa=0,exMa=0,exAu=0;
   var sysMap={fa:0,ma:0,au:0,la:0,ec:0,ot:0};
-  var doneCnt=0,regCnt=0,gpaSum=0,gpaCreds=0;
+  var doneCnt=0,regCnt=0;
 
   // 同名科目（同じ科目名）は1つだけ卒業単位に算入（クラス違い重複対策）
   var doneNames={bas:{},dev:{},app:{}};
@@ -1163,9 +1151,6 @@ function UPD(){
     if(!sd.done)return;
     doneCnt++;
     doneList.push(s);
-    // GPA計算
-    var gv={shu:4,yu:3,ryo:2,ka:1};
-    if(sd.grade&&gv[sd.grade]){gpaSum+=gv[sd.grade]*s.credits;gpaCreds+=s.credits;}
     sysMap[s.system]=(sysMap[s.system]||0)+s.credits;
     // 卒業単位算入（導入は除外）
     if(s.group==='int')return;
@@ -1195,23 +1180,7 @@ function UPD(){
   setEl('rc',Math.max(0,48-gradTot));
   setEl('cn',doneCnt);
   setEl('rn',regCnt);
-  var gpa=gpaCreds?Math.round(gpaSum/gpaCreds*100)/100:null;
-  var gpaEl=document.getElementById('gpa-val');if(gpaEl)gpaEl.textContent=gpa?gpa.toFixed(2):'-';
-  var gpaEl2=document.getElementById('gpa-val2');if(gpaEl2)gpaEl2.textContent=gpa?gpa.toFixed(2):'-';
-  // 成績分布
-  var gradeDist={shu:0,yu:0,ryo:0,ka:0};
-  D.forEach(function(s){var pd=GDpersonal(s.code);if(pd.done&&pd.grade)gradeDist[pd.grade]=(gradeDist[pd.grade]||0)+1;});
-  var distEl=document.getElementById('gpa-dist');
-  if(distEl){
-    var distHtml='';
-    var gl={shu:'秀',yu:'優',ryo:'良',ka:'可'};
-    var gc={shu:'#856404',yu:'#0c5460',ryo:'#155724',ka:'#721c24'};
-    var gb={shu:'#fff3cd',yu:'#d1ecf1',ryo:'#d4edda',ka:'#f8d7da'};
-    ['shu','yu','ryo','ka'].forEach(function(g){
-      if(gradeDist[g])distHtml+='<span class="gpa-item" style="color:'+gc[g]+';background:'+gb[g]+'">'+gl[g]+' '+gradeDist[g]+'科目</span>';
-    });
-    distEl.innerHTML=distHtml||'<span style="font-size:.72rem;color:var(--muted)">成績未記録</span>';
-  }
+
   var pct=Math.min(Math.round(gradTot/48*100),100);
   var regGradTotSbar=regBas+regDev+regApp; // ステータスバー用（regGradTotは後で定義）
   var pctReg=Math.min(Math.round((gradTot+regGradTotSbar)/48*100),100);
@@ -1286,6 +1255,9 @@ function UPD(){
   // 履修済み科目一覧
   window._doneList=doneList; // フィルター用にグローバル保持
   renderDoneList(doneList, window._dlf||'all');
+
+  // 履修計画チェッカー
+  renderChecker(bas,dev,app,regBas,regDev,regApp,exFa,exMa,exAu,regExFa,regExMa,regExAu);
 }
 
 function setBar(id,v,max){
@@ -1378,6 +1350,132 @@ function renderDoneList(list,filter){
   dl.innerHTML='<table class="done-table"><thead><tr>'+
     '<th>科目群</th><th>系統</th><th>科目名</th><th>単位</th><th>おすすめ</th><th>難易度</th><th>区分</th>'+
     '</tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+// ============================================================
+// 履修計画チェッカー
+// ============================================================
+function renderChecker(bas,dev,app,regBas,regDev,regApp,exFa,exMa,exAu,regExFa,regExMa,regExAu){
+  var grid=document.getElementById('checker-grid');
+  var note=document.getElementById('checker-note');
+  if(!grid)return;
+
+  var gradTot=bas+dev+app;
+  var exTot=exFa+exMa+exAu;
+
+  // シナリオ1: 今のペース（履修済みのみ）
+  var s1_grad=Math.max(0,48-gradTot);
+  var s1_fa=Math.max(0,10-exFa);
+  var s1_ma=Math.max(0,6-exMa);
+  var s1_au=Math.max(0,6-exAu);
+  var s1_ex=Math.max(0,28-exTot);
+  var s1_ok=gradTot>=48&&exFa>=10&&exMa>=6&&exAu>=6&&exTot>=28;
+
+  // シナリオ2: 履修登録済みも含む
+  var r_grad=gradTot+regBas+regDev+regApp;
+  var r_fa=exFa+regExFa; var r_ma=exMa+regExMa; var r_au=exAu+regExAu;
+  var r_ex=r_fa+r_ma+r_au;
+  var s2_grad=Math.max(0,48-r_grad);
+  var s2_fa=Math.max(0,10-r_fa);
+  var s2_ma=Math.max(0,6-r_ma);
+  var s2_au=Math.max(0,6-r_au);
+  var s2_ex=Math.max(0,28-r_ex);
+  var s2_ok=r_grad>=48&&r_fa>=10&&r_ma>=6&&r_au>=6&&r_ex>=28;
+
+  // シナリオ3: 卒業のみクリア（免除なし）
+  var s3_ok=gradTot>=48;
+
+  function mkScenario(title,items,ok){
+    var cls=ok?'ok':items.some(function(x){return x[1]>0&&x[1]<=4;})?'warn':'ng';
+    var rows=items.map(function(x){
+      var vc=x[1]===0?'ok':x[1]<=4?'near':'ng';
+      var mark=x[1]===0?'✅':'あと'+x[1]+'単位';
+      return '<div class="scenario-row"><span class="scenario-lbl">'+x[0]+'</span><span class="scenario-val '+vc+'">'+mark+'</span></div>';
+    }).join('');
+    return '<div class="scenario-item '+cls+'"><div class="scenario-ttl">'+(ok?'✅ ':'🔸 ')+title+'</div>'+rows+'</div>';
+  }
+
+  grid.innerHTML=
+    mkScenario('現在の履修済み状況',[
+      ['卒業（48単位）',s1_grad],
+      ['短答免除 財務(i)',s1_fa],
+      ['短答免除 管理(ii)',s1_ma],
+      ['短答免除 監査(iii)',s1_au],
+      ['短答免除 合計(28)',s1_ex]
+    ],s1_ok)+
+    mkScenario('履修登録まで完了した場合',[
+      ['卒業（48単位）',s2_grad],
+      ['短答免除 財務(i)',s2_fa],
+      ['短答免除 管理(ii)',s2_ma],
+      ['短答免除 監査(iii)',s2_au],
+      ['短答免除 合計(28)',s2_ex]
+    ],s2_ok)+
+    mkScenario('卒業要件のみ達成',[
+      ['基本科目群',Math.max(0,16-bas)],
+      ['発展科目群',Math.max(0,16-dev)],
+      ['応用科目群',Math.max(0,12-app)],
+      ['合計（48単位）',s1_grad]
+    ],s3_ok);
+
+  // 注記
+  var notes=[];
+  if(s1_grad>0)notes.push('卒業まであと<b>'+s1_grad+'単位</b>必要です。');
+  if(s1_fa>0)notes.push('短答免除の財務会計系があと<b>'+s1_fa+'単位</b>不足しています。');
+  if(s1_ma>0)notes.push('管理会計系があと<b>'+s1_ma+'単位</b>不足しています。');
+  if(s1_au>0)notes.push('監査系があと<b>'+s1_au+'単位</b>不足しています。');
+  if(s1_ok)notes.push('🎉 全要件達成済みです！');
+  if(note)note.innerHTML=notes.join(' ');
+}
+
+// ============================================================
+// CSVエクスポート
+// ============================================================
+function exportCSV(){
+  var header=['科目コード','科目名','年次','科目群','系統','単位数','履修済み','履修登録','免除対象','必修','学期','担当者'];
+  var rows=[header];
+  D.forEach(function(s){
+    var pd=GDpersonal(s.code);
+    var sc=GSC(s.code);
+    var avgRat=0,avgDif=0;
+    if(sc.cmt&&sc.cmt.length){
+      var rs=0,rc=0,ds=0,dc=0;
+      sc.cmt.forEach(function(r){if(r.rat>0){rs+=r.rat;rc++;}if(r.dif>0){ds+=r.dif;dc++;}});
+      avgRat=rc?Math.round(rs/rc*10)/10:0;
+      avgDif=dc?Math.round(ds/dc*10)/10:0;
+    }
+    rows.push([
+      s.code,
+      s.name,
+      s.year,
+      {int:'導入',bas:'基本',dev:'発展',app:'応用・実践'}[s.group]||s.group,
+      {fa:'財務会計',ma:'管理会計',au:'監査',la:'法律・税務',ec:'経営・経済',ot:'横断・演習'}[s.system]||s.system,
+      s.credits,
+      pd.done?'○':'',
+      pd.reg?'○':'',
+      s.exempt?'○':'',
+      s.required?'○':'',
+      s.schedule,
+      s.teacher
+    ]);
+  });
+
+  // BOM付きUTF-8でExcel対応
+  var csv='\uFEFF'+rows.map(function(r){
+    return r.map(function(v){
+      var s=String(v==null?'':v);
+      if(s.indexOf(',')>=0||s.indexOf('"')>=0){
+        s='"'+s.replace(/"/g,'""')+'"';
+      }
+      return s;
+    }).join(',');
+  }).join('\r\n');
+
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='関大シラバス_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ============================================================
