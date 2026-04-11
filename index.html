@@ -1499,11 +1499,13 @@ function exportTimetableCSV(){
     var cells={};
     DAYS.forEach(function(d){PERIODS.forEach(function(p){cells[d+'_'+p]=[];})});
     D.forEach(function(s){
+      var pd=GDpersonal(s.code);
+      // 履修登録済み（reg）のみ出力（done済みも含む）
+      if(!pd.reg)return;  // 履修登録済みのみ（履修済みは除外）
       var slots=parseSched(s.schedule,sem);
       slots.forEach(function(slot){
         var key=slot.day+'_'+slot.period;
         if(cells[key]){
-          var pd=GDpersonal(s.code);
           var label=s.name;
           if(s.class_)label+='('+s.class_+')';
           label+=' ['+s.teacher+']';
